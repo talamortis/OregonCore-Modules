@@ -162,8 +162,7 @@ public:
                 player->RemoveSpell(i.first);
         }
         sWorld.InvalidatePlayerDataToAllClient(player->GetGUID());
-        player->SaveToDB();
-        sWorld.KickPlayer(player->GetName());
+        player->GetSession()->LogoutPlayer(true);
 
     }
 
@@ -475,8 +474,7 @@ public:
             pPlayer->DestroyItemCount(itemid, itemcount, true);
 
             pPlayer->SetAtLoginFlag(AT_LOGIN_RENAME);
-            pPlayer->GetSession()->KickPlayer();
-            pPlayer->CLOSE_GOSSIP_MENU();
+            pPlayer->GetSession()->LogoutPlayer(true);
         }
         break;
         case 1501: // Gender
@@ -713,12 +711,9 @@ public:
             pPlayer->ModifyArenaPoints((-1)*fields1[2].GetUInt32());
             pPlayer->DestroyItemCount(fields1[3].GetUInt32(), fields1[4].GetUInt32(), true);
 
-            SetRace(pPlayer, pPlayer->getRace(), 1);
             pPlayer->CastSpell(pPlayer, 24222, true);
             SetRace(pPlayer, pPlayer->getRace(), 1);
 
-
-            pPlayer->CLOSE_GOSSIP_MENU();
         }
         break;
         case 2002:
@@ -730,11 +725,8 @@ public:
             pPlayer->ModifyArenaPoints((-1)*fields1[2].GetUInt32());
             pPlayer->DestroyItemCount(fields1[3].GetUInt32(), fields1[4].GetUInt32(), true);
 
-            SetRace(pPlayer, pPlayer->getRace(), 2);
             pPlayer->CastSpell(pPlayer, 24222, true);
             SetRace(pPlayer, pPlayer->getRace(), 2);
-
-            pPlayer->CLOSE_GOSSIP_MENU();
         }
         break;
         case 2003:
@@ -746,11 +738,9 @@ public:
             pPlayer->ModifyArenaPoints((-1)*fields1[2].GetUInt32());
             pPlayer->DestroyItemCount(fields1[3].GetUInt32(), fields1[4].GetUInt32(), true);
 
-            SetRace(pPlayer, pPlayer->getRace(), 3);
             pPlayer->CastSpell(pPlayer, 24222, true);
             SetRace(pPlayer, pPlayer->getRace(), 3);
 
-            pPlayer->CLOSE_GOSSIP_MENU();
         }
         break;
         case 2004:
@@ -762,11 +752,9 @@ public:
             pPlayer->ModifyArenaPoints((-1)*fields1[2].GetUInt32());
             pPlayer->DestroyItemCount(fields1[3].GetUInt32(), fields1[4].GetUInt32(), true);
 
-            SetRace(pPlayer, pPlayer->getRace(), 4);
             pPlayer->CastSpell(pPlayer, 24222, true);
             SetRace(pPlayer, pPlayer->getRace(), 4);
 
-            pPlayer->CLOSE_GOSSIP_MENU();
         }
         break;
         case 2005:
@@ -778,11 +766,9 @@ public:
             pPlayer->ModifyArenaPoints((-1)*fields1[2].GetUInt32());
             pPlayer->DestroyItemCount(fields1[3].GetUInt32(), fields1[4].GetUInt32(), true);
 
-            SetRace(pPlayer, pPlayer->getRace(), 5);
             pPlayer->CastSpell(pPlayer, 24222, true);
             SetRace(pPlayer, pPlayer->getRace(), 5);
 
-            pPlayer->CLOSE_GOSSIP_MENU();
         }
         break;
         case 2006:
@@ -794,11 +780,9 @@ public:
             pPlayer->ModifyArenaPoints((-1)*fields1[2].GetUInt32());
             pPlayer->DestroyItemCount(fields1[3].GetUInt32(), fields1[4].GetUInt32(), true);
 
-            SetRace(pPlayer, pPlayer->getRace(), 6);
             pPlayer->CastSpell(pPlayer, 24222, true);
             SetRace(pPlayer, pPlayer->getRace(), 6);
 
-            pPlayer->CLOSE_GOSSIP_MENU();
         }
         break;
         case 2007:
@@ -810,11 +794,9 @@ public:
             pPlayer->ModifyArenaPoints((-1)*fields1[2].GetUInt32());
             pPlayer->DestroyItemCount(fields1[3].GetUInt32(), fields1[4].GetUInt32(), true);
 
-            SetRace(pPlayer, pPlayer->getRace(), 7);
             pPlayer->CastSpell(pPlayer, 24222, true);
             SetRace(pPlayer, pPlayer->getRace(), 7);
 
-            pPlayer->CLOSE_GOSSIP_MENU();
         }
         break;
         case 2008:
@@ -826,11 +808,9 @@ public:
             pPlayer->ModifyArenaPoints((-1)*fields1[2].GetUInt32());
             pPlayer->DestroyItemCount(fields1[3].GetUInt32(), fields1[4].GetUInt32(), true);
 
-            SetRace(pPlayer, pPlayer->getRace(), 8);
             pPlayer->CastSpell(pPlayer, 24222, true);
             SetRace(pPlayer, pPlayer->getRace(), 8);
 
-            pPlayer->CLOSE_GOSSIP_MENU();
         }
         break;
         case 2009:
@@ -842,11 +822,9 @@ public:
             pPlayer->ModifyArenaPoints((-1)*fields1[2].GetUInt32());
             pPlayer->DestroyItemCount(fields1[3].GetUInt32(), fields1[4].GetUInt32(), true);
 
-            SetRace(pPlayer, pPlayer->getRace(), 10);
             pPlayer->CastSpell(pPlayer, 24222, true);
             SetRace(pPlayer, pPlayer->getRace(), 10);
 
-            pPlayer->CLOSE_GOSSIP_MENU();
         }
         break;
         case 2010:
@@ -858,11 +836,9 @@ public:
             pPlayer->ModifyArenaPoints((-1)*fields1[2].GetUInt32());
             pPlayer->DestroyItemCount(fields1[3].GetUInt32(), fields1[4].GetUInt32(), true);
 
-            SetRace(pPlayer, pPlayer->getRace(), 11);
             pPlayer->CastSpell(pPlayer, 24222, true);
             SetRace(pPlayer, pPlayer->getRace(), 11);
 
-            pPlayer->CLOSE_GOSSIP_MENU();
         }
         break;
         }
