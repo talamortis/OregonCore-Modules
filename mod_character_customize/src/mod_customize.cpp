@@ -104,8 +104,8 @@ public:
         else if (current < 0)
             current = max;
 
-        //player->SetByteValue(PLAYER_BYTES, 3, current);
-        player->SetUInt32Value(PLAYER_BYTES_2, (current | (0x00 << 8) | (0x00 << 16) | (0x02 << 24)));
+        player->SetByteValue(PLAYER_BYTES, 3, current);
+        //player->SetUInt32Value(PLAYER_BYTES_2, (current | (0x00 << 8) | (0x00 << 16) | (0x02 << 24)));
         ChangeEffect(player);
     }
 
