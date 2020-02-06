@@ -1,7 +1,6 @@
 //by SymbolixDEV
 //Reworked by Talamortis
 #include "ScriptMgr.h"
-#include "Config.h"
 #include <Player.h>
 #include "Guild.h"
 #include "Group.h"
