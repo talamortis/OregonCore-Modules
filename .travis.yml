@@ -3,17 +3,32 @@ dist: trusty # (14.04)
 # xenial (16.04) is not supported yet
 
 language: cpp
-compiler:
-  - clang
+compiler: gcc
+
+# whitelisted packages can be obtained quickly without downloading
+# doxygen is out of date, tho so we download its binaries
+addons:
+  apt:
+    packages:
+      - cmake
+      - build-essential
+      - cppcheck
+      - git
+      - make
+      - binutils-dev
+      - libiberty-dev
+      - openssl
+      - libssl-dev
+      - zlib1g-dev
+      - zip
+      - unzip
 
 git:
   depth: 1
 
 before_install:
-  - sudo apt-get -y install build-essential libtool make cmake cmake-data openssl
-  - sudo apt-get -y install libssl-dev libmysqlclient-dev libmysql++-dev libreadline6-dev zlib1g-dev libbz2-dev libace-dev
-  - git config user.email "travis@build.bot" && git config user.name "Travis CI"
-  - git tag -a -m "Travis build" init
+  - sudo apt-get -qq install mariadb-server libace-6.* libace-dev
+  - if [[ $TRAVIS_PULL_REQUEST == 'true' ]]; then exit; fi
   
 install:
   - cd ..
