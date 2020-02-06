@@ -1,6 +1,5 @@
 sudo: required
-dist: trusty # (14.04)
-# xenial (16.04) is not supported yet
+dist: xenial
 
 language: cpp
 compiler: gcc
@@ -35,8 +34,6 @@ install:
   - git clone --depth=1 --branch=master https://github.com/talamortis/OregonCore.git oregoncore
   - mv OregonCore-Modules oregoncore/modules
   - cd oregoncore
-  - git submodule update --init --recursive
-  - mysql -uroot -e 'create database test_mysql;'
   - mkdir build
   - cd build
   - cmake .. -DCMAKE_C_COMPILER="gcc" -DCMAKE_CXX_COMPILER="g++" -DSERVERS=1 -DTOOLS=1 -DSCRIPTS=1 -DWITH_DOCS=1 -DWITH_WARNINGS=0 -DWITH_COREDEBUG=0
