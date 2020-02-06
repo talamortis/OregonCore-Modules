@@ -21,11 +21,11 @@ install:
   - mv OregonCore-Modules oregoncore/modules
   - cd oregoncore
   - git submodule update --init --recursive
-
   - mysql -uroot -e 'create database test_mysql;'
-  - cd bin
+  - mkdir build
+  - cd build
   - cmake .. -DCMAKE_C_COMPILER="gcc" -DCMAKE_CXX_COMPILER="g++" -DSERVERS=1 -DTOOLS=1 -DSCRIPTS=1 -DWITH_DOCS=1 -DWITH_WARNINGS=0 -DWITH_COREDEBUG=0
-  - cd ..
+  - make -j2
 
 script:
   - cd $TRAVIS_BUILD_DIR/sql
