@@ -50,4 +50,4 @@ script:
   - mysql -u oregon -poregon world < database_17_11_19.sql
   - cat updates/realmd/*.sql | mysql -u oregon -p oregon realmd
   - cat updates/characters/*.sql | mysql -u oregon -p oregon characters
-  - cat updates/world/*.sql | mysql -u oregon -poregon world
+  - cat updates/world/*.sql | mysql -u oregon -p oregon world
