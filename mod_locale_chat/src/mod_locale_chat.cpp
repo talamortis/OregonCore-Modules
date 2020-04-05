@@ -5,6 +5,8 @@
 #include "Chat.h"
 #include "Config.h"
 #include "ScriptMgr.h"
+#include "SocialMgr.h"
+#include "Utilities/DataMap.h"
 
 /* Class Colors */
 std::string world_chat_ClassColor[11] =
@@ -43,6 +45,15 @@ std::string locale[9] =
 
 std::string channel_colour = "|cffFEC1C0";
 
+class chat_locale_data : public DataMap::Base
+{
+public:
+    chat_locale_data() {}
+
+    chat_locale_data(bool enabled) : enable(enabled) {}
+    bool enable;
+};
+
 class chat_locale : public CommandScript
 {
 public:
@@ -55,6 +66,14 @@ public:
         if (!*msg)
             return false;
 
+        chat_locale_data* Playerdata = player->CustomData.GetDefault<chat_locale_data>("chat_locale_data");
+
+        if (!Playerdata->enable)
+        {
+            ChatHandler(player).PSendSysMessage("Localized chat is currently disabled. Please enable it");
+            return true;
+        }
+
         SessionMap sessions = sWorld.GetAllSessions();
 
         for (SessionMap::iterator itr = sessions.begin(); itr != sessions.end(); ++itr)
@@ -63,6 +82,7 @@ public:
                 continue;
 
             Player* target = itr->second->GetPlayer();
+            chat_locale_data* targetData = target->CustomData.GetDefault<chat_locale_data>("chat_locale_data");
 
             std::ostringstream ss;
 
@@ -76,9 +96,18 @@ public:
                 if (pChat->GetSession()->GetSessionDbcLocale() != target->GetSession()->GetSessionDbcLocale())
                     continue;
 
+                // allow crossfaction chat.
                 if (!sWorld.GetModuleBoolConfig("Chatlocale.AllowTwoSide", true))
                     if (player->GetTeam() != target->GetTeam())
                         continue;
+
+                // Check see if target is ignoring sender.
+                if (target->GetSocial()->HasIgnore(player->GetGUIDLow()))
+                    continue;
+
+                // Check see if target has enabled or disabled locale chat
+                if (!targetData->enable)
+                    continue;
 
                 ChatHandler(target->GetSession()).PSendSysMessage(ss.str().c_str());
             }
@@ -86,11 +115,45 @@ public:
         return true;
     }
 
+    static bool HandleLocaleChatOnCommand(ChatHandler* pChat, const char* msg)
+    {
+        Player* player = pChat->GetSession()->GetPlayer();
+
+        chat_locale_data* data = player->CustomData.GetDefault<chat_locale_data>("chat_locale_data");
+
+        data->enable = true;
+
+        ChatHandler(player).PSendSysMessage("You have enabled localized chat");
+
+        return true;
+    }
+
+    static bool HandleLocaleChatOffCommand(ChatHandler* pChat, const char* msg)
+    {
+        Player* player = pChat->GetSession()->GetPlayer();
+
+        chat_locale_data* data = player->CustomData.GetDefault<chat_locale_data>("chat_locale_data");
+
+        data->enable = false;
+
+        ChatHandler(player).PSendSysMessage("You have disabled localized chat");
+
+        return true;
+    }
+
     ChatCommand* GetCommands() const
     {
+        static ChatCommand localeChat_sub[] =
+        {
+            { "on",      SEC_PLAYER,     false,    &HandleLocaleChatOnCommand,      "", NULL},
+            { "off",     SEC_PLAYER,     false,    &HandleLocaleChatOffCommand,       "", NULL  },
+            { "",        SEC_PLAYER,     false,    &HandleLocaleCommand,       "", NULL },
+
+        };
+
         static ChatCommand cmdtable[] =
         {
-            { "locale", SEC_PLAYER, true, &HandleLocaleCommand , "", NULL},
+            { "locale", SEC_PLAYER, true, NULL , "", localeChat_sub},
         };
 
         return cmdtable;
