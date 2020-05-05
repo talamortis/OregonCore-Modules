@@ -3,7 +3,6 @@
 #include "ChannelMgr.h"
 #include "Channel.h"
 #include "Chat.h"
-#include "Config.h"
 #include "ScriptMgr.h"
 #include "SocialMgr.h"
 #include "Utilities/DataMap.h"
