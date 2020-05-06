@@ -40,14 +40,14 @@ install:
   - make -j2
 
 script:
-  - cd $TRAVIS_BUILD_DIR/sql
+  - cd oregoncore/sql
   - sudo mysql -u root --password='' < create/create_mysql.sql
   - mysql -u oregon -p oregon realmd < base/realmd.sql
   - mysql -u oregon -p oregon characters < base/characters.sql
-  # mysql -u oregon -poregon world < base/world.sql
+  # mysql -u oregon -p oregon world < base/world.sql
   - curl -L --retry 3 -o database_17_11_19.zip https://github.com/talamortis/OregonCore/releases/download/v1.0/database_17_11_19.zip
   - unzip database_17_11_19.zip
   - mysql -u oregon -p oregon world < database_17_11_19.sql
   - cat updates/realmd/*.sql | mysql -u oregon -p oregon realmd
   - cat updates/characters/*.sql | mysql -u oregon -p oregon characters
-  - cat updates/world/*.sql | mysql -u oregon -p oregon world
+  - cat updates/world/*.sql | mysql -u oregon -p oregon world world
