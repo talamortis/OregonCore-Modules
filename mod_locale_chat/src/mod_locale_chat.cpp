@@ -8,7 +8,7 @@
 #include "Utilities/DataMap.h"
 
 /* Class Colors */
-std::string world_chat_ClassColor[11] =
+std::string locale_chat_ClassColor[11] =
 {
     "|cffC79C6E", // WARRIOR
     "|cffF58CBA", // PALADIN
@@ -23,7 +23,7 @@ std::string world_chat_ClassColor[11] =
     "|cffFF7D0A", // DRUID
 };
 
-std::string world_chat_TeamIcon[2] =
+std::string locale_chat_TeamIcon[2] =
 {
     "|cff3399FFAlliance|r",
     "|cffCC0000Horde|r"
@@ -85,8 +85,8 @@ public:
 
             std::ostringstream ss;
 
-            ss << channel_colour.c_str() << "[World] [" << locale[player->GetSession()->GetSessionDbcLocale()] << "] [|r" << world_chat_TeamIcon[player->GetTeamId()] << "|r" << 
-                channel_colour.c_str() << "] [" << world_chat_ClassColor[player->getClass() - 1] << "|Hplayer:" << player->GetName() << "|h" <<  player->GetName() << "|h|r" << channel_colour << "]: " << msg; 
+            ss << channel_colour.c_str() << "[World] [" << locale[player->GetSession()->GetSessionDbcLocale()] << "] [|r" << locale_chat_TeamIcon[player->GetTeamId()] << "|r" << 
+                channel_colour.c_str() << "] [" << locale_chat_ClassColor[player->getClass() - 1] << "|Hplayer:" << player->GetName() << "|h" <<  player->GetName() << "|h|r" << channel_colour << "]: " << msg; 
 
             if (target->IsGameMaster())
                 ChatHandler(target->GetSession()).PSendSysMessage(ss.str().c_str());
