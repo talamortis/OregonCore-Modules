@@ -40,7 +40,7 @@ install:
   - make -j2
 
 script:
-  - cd oregoncore/sql
+  - cd $TRAVIS_BUILD_DIR/oregoncore/sql
   - sudo mysql -u root --password='' < create/create_mysql.sql
   - mysql -u oregon -poregon realmd < base/realmd.sql
   - mysql -u oregon -poregon characters < base/characters.sql
