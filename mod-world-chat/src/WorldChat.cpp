@@ -14,7 +14,6 @@
 #include "Common.h"
 #include "World.h"
 #include "WorldSession.h"
-#include "Config.h"
 #include <unordered_map>
 
 /* VERSION */
