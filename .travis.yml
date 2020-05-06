@@ -32,7 +32,7 @@ before_install:
 install:
   - cd ..
   - git clone --depth=1 --branch=master https://github.com/talamortis/OregonCore.git oregoncore
-  - mv OregonCore-Modules oregoncore/modules
+  - mv OregonCore-Modules/* oregoncore/modules/
   - cd oregoncore
   - mkdir build
   - cd build
@@ -40,7 +40,7 @@ install:
   - make -j2
 
 script:
-  - cd $TRAVIS_BUILD_DIR/sql
+  - cd /home/travis/build/talamortis/oregoncore/sql
   - sudo mysql -u root --password='' < create/create_mysql.sql
   - mysql -u oregon -poregon realmd < base/realmd.sql
   - mysql -u oregon -poregon characters < base/characters.sql
@@ -48,6 +48,6 @@ script:
   - curl -L --retry 3 -o database_17_11_19.zip https://github.com/talamortis/OregonCore/releases/download/v1.0/database_17_11_19.zip
   - unzip database_17_11_19.zip
   - mysql -u oregon -poregon world < database_17_11_19.sql
-  - cat updates/realmd/*.sql | mysql -u oregon -poregon realmd
-  - cat updates/characters/*.sql | mysql -u oregon -poregon characters
-  - cat updates/world/*.sql | mysql -u oregon -poregon world
+  - cat /home/travis/build/talamortis/oregoncore/sql/updates/realmd/*.sql | mysql -u oregon -poregon realmd
+  - cat /home/travis/build/talamortis/oregoncore/sql/updates/characters/*.sql | mysql -u oregon -poregon characters
+  - cat /home/travis/build/talamortis/oregoncore/sql/updates/world/*.sql | mysql -u oregon -poregon world
