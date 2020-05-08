@@ -95,21 +95,21 @@ public:
     }
 };
 
-/* class ChatCensureCommand : public CommandScript 
+class ChatCensureCommand : public CommandScript 
 {
 public:
     ChatCensureCommand() : CommandScript("ChatCensureCommand") { }
 
-    std::vector<ChatCommand> GetCommands() const override
+    ChatCommand* GetCommands() const
     {
-        static std::vector<ChatCommand> ChatCensureCommandTable =
+        static ChatCommand ChatCensureCommandTable[] =
         {
             { "Reload", SEC_ADMINISTRATOR, false, &HandleReloadCommand, "Realod the chat Censure table" },
             { "Add",    SEC_ADMINISTRATOR, false, &HandleAddCommand,    "Ban a word. Please use quotation marks when adding."},
             { "Delete", SEC_ADMINISTRATOR, false, &HandleDeleteCommand, "Delete a banned word. Please use quotation marks when deleting"}
         };
 
-        static std::vector<ChatCommand> ChatCensurePBaseTable =
+        static ChatCommand ChatCensurePBaseTable[] =
         {
             { "ChatCensure", SEC_ADMINISTRATOR, false, nullptr, "", ChatCensureCommandTable }
         };
@@ -119,13 +119,13 @@ public:
 
     static bool HandleReloadCommand(ChatHandler* handler, char const* args)
     {
-        Player* me = handler->()->GetPlayer();
+        Player* me = handler->GetSession()->GetPlayer();
 
         if (!me)
             return false;
 
         chat.clear();
-        QueryResult result = CharacterDatabase.PQuery("SELECT `id`,`text` FROM chat_censure");
+        QueryResult_AutoPtr result = CharacterDatabase.PQuery("SELECT `id`,`text` FROM chat_censure");
         uint32 count = 0;
         uint32 oldMSTime = getMSTime();
 
@@ -162,7 +162,7 @@ public:
         std::string text = textExtracted;
 
         //lets check the Database to see if arguement already exist
-        QueryResult result = CharacterDatabase.PQuery("SELECT `text` FROM `chat_censure` WHERE `text` = '%s'", text.c_str());
+        QueryResult_AutoPtr result = CharacterDatabase.PQuery("SELECT `text` FROM `chat_censure` WHERE `text` = '%s'", text.c_str());
 
         if (result)
         {
@@ -194,7 +194,7 @@ public:
 
         std::string text = textExtracted;
 
-        QueryResult result = CharacterDatabase.PQuery("SELECT `text` FROM `chat_censure` WHERE `text` = '%s'", text.c_str());
+        QueryResult_AutoPtr result = CharacterDatabase.PQuery("SELECT `text` FROM `chat_censure` WHERE `text` = '%s'", text.c_str());
 
         if (!result)
         {
@@ -209,11 +209,11 @@ public:
         return true;
     }
 
-}; */
+}; 
 
 void AddSC_SystemCensure()
 {
-    //new ChatCensureCommand();
+    new ChatCensureCommand();
     new SystemCensure();
     new LoadChatTable();
 }
