@@ -100,21 +100,21 @@ class ChatCensureCommand : public CommandScript
 public:
     ChatCensureCommand() : CommandScript("ChatCensureCommand") { }
 
-    ChatCommand* GetCommands() const
+    std::vector<ChatCommand> GetCommands() const override
     {
-        static ChatCommand ChatCensureCommandTable[] =
+        static std::vector<ChatCommand> ChatCensureCommandTable =
         {
             { "Reload", SEC_ADMINISTRATOR, false, &HandleReloadCommand, "Realod the chat Censure table" },
             { "Add",    SEC_ADMINISTRATOR, false, &HandleAddCommand,    "Ban a word. Please use quotation marks when adding."},
             { "Delete", SEC_ADMINISTRATOR, false, &HandleDeleteCommand, "Delete a banned word. Please use quotation marks when deleting"}
         };
 
-        static ChatCommand ChatCensurePBaseTable[] =
+        static std::vector<ChatCommand> commandTable =
         {
             { "ChatCensure", SEC_ADMINISTRATOR, false, nullptr, "", ChatCensureCommandTable }
         };
 
-        return ChatCensurePBaseTable;
+        return commandTable;
     }
 
     static bool HandleReloadCommand(ChatHandler* handler, char const* args)

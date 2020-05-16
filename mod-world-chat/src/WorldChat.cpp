@@ -75,10 +75,10 @@ struct ChatElements
 std::unordered_map<uint32, ChatElements>WorldChat;
 
 
-class example_commandscript : public CommandScript
+class WorldChat_commandscript : public CommandScript
 {
 public:
-    example_commandscript() : CommandScript("example_commandscript") { }
+    WorldChat_commandscript() : CommandScript("example_commandscript") { }
 
     static bool HandleWorldChatCommand(ChatHandler * pChat, const char * msg)
     {
@@ -312,29 +312,22 @@ public:
         return true;
     };
 
-    static bool HandleHelloWorldCommand(ChatHandler* handler, const char* /*args*/)
-    {
-        handler->PSendSysMessage("Hello World");
-        return true;
-    }
-
-    ChatCommand* GetCommands() const
+    std::vector<ChatCommand> GetCommands() const override
     {
 
-        static ChatCommand wcCommandTable[] =
+        static std::vector<ChatCommand> wcCommandTable =
         {
-            { "on",      SEC_PLAYER,     false,     &HandleWorldChatOnCommand,      "", NULL},
-            { "off",     SEC_PLAYER,     false,    &HandleWorldChatOffCommand,       "", NULL  },
-            { "",        SEC_PLAYER,     false,    &HandleWorldChatCommand,       "", NULL },
+            { "on",      SEC_PLAYER,     false,     &HandleWorldChatOnCommand,      ""},
+            { "off",     SEC_PLAYER,     false,    &HandleWorldChatOffCommand,       ""},
+            { "",        SEC_PLAYER,     false,    &HandleWorldChatCommand,       ""},
 
         };
 
-        static ChatCommand commandTable[] =
+        static std::vector<ChatCommand> commandTable =
         {
             { "chat", SEC_PLAYER, true, NULL , "" , wcCommandTable,},
-            { "chath", SEC_MODERATOR, true, &HandleWorldChatHordeCommand , "", NULL},
-            { "chata", SEC_MODERATOR, true, &HandleWorldChatAllianceCommand , "", NULL},
-            { "hello",          SEC_PLAYER,         true,   &HandleHelloWorldCommand,        "", NULL }
+            { "chath", SEC_MODERATOR, true, &HandleWorldChatHordeCommand , ""},
+            { "chata", SEC_MODERATOR, true, &HandleWorldChatAllianceCommand , ""},
         };
 
         return commandTable;
@@ -360,5 +353,5 @@ public:
 void AddSC_WorldChatScripts()
 {
     new WorldChat_Announce();
-    new example_commandscript();
+    new WorldChat_commandscript();
 }

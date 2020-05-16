@@ -140,17 +140,16 @@ public:
         return true;
     }
 
-    ChatCommand* GetCommands() const
+    std::vector<ChatCommand> GetCommands() const override
     {
-        static ChatCommand localeChat_sub[] =
+        static std::vector<ChatCommand> localeChat_sub =
         {
-            { "on",      SEC_PLAYER,     false,    &HandleLocaleChatOnCommand,      "", NULL},
-            { "off",     SEC_PLAYER,     false,    &HandleLocaleChatOffCommand,       "", NULL  },
-            { "",        SEC_PLAYER,     false,    &HandleLocaleCommand,       "", NULL },
-
+            { "on",      SEC_PLAYER,     false,    &HandleLocaleChatOnCommand,      ""},
+            { "off",     SEC_PLAYER,     false,    &HandleLocaleChatOffCommand,       ""},
+            { "",        SEC_PLAYER,     false,    &HandleLocaleCommand,       ""}
         };
 
-        static ChatCommand cmdtable[] =
+        static std::vector<ChatCommand> cmdtable =
         {
             { "locale", SEC_PLAYER, true, NULL , "", localeChat_sub},
         };
