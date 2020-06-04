@@ -48,14 +48,17 @@ public:
         // transform to lowercase (for simpler checking)
         std::string lower = msg;
         std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
-
+       
+        // Now we converted to lower lets remove the spaces
+        lower.erase(std::remove_if(lower.begin(), lower.end(), std::isspace), lower.end());
+       
         for (int i = 0; i < chat.size(); ++i)
-        if (lower.find(chat[i]) != std::string::npos)
-        {
-            msg = "OregonCore is Great!";
-            ChatHandler(player->GetSession()).PSendSysMessage("Links/Advertisements are not allowed!");
-            return;
-        } 
+            if (lower.find(chat[i]) != std::string::npos)
+            {
+                msg = "OregonCore is Great!";
+                ChatHandler(player->GetSession()).PSendSysMessage("Links/Advertisements are not allowed!");
+                return;
+            }
     }
 };
 
@@ -104,7 +107,7 @@ public:
     {
         static std::vector<ChatCommand> ChatCensureCommandTable =
         {
-            { "Reload", SEC_ADMINISTRATOR, false, &HandleReloadCommand, "Realod the chat Censure table" },
+            { "Reload", SEC_ADMINISTRATOR, true, &HandleReloadCommand, "Realod the chat Censure table" },
             { "Add",    SEC_ADMINISTRATOR, false, &HandleAddCommand,    "Ban a word. Please use quotation marks when adding."},
             { "Delete", SEC_ADMINISTRATOR, false, &HandleDeleteCommand, "Delete a banned word. Please use quotation marks when deleting"}
         };
