@@ -1,7 +1,9 @@
 #include "ScriptMgr.h"
 #include "Chat.h"
 #include <list>
+#include <algorithm>
 #include <cctype>
+#include <string>
 
 std::vector<std::string>chat;
 
