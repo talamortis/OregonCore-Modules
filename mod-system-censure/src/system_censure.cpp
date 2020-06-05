@@ -53,7 +53,7 @@ public:
         std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
        
         // Now we converted to lower lets remove the spaces
-        lower.erase(std::remove_if(lower.begin(), lower.end(), std::isspace), lower.end());
+        lower.erase(std::remove_if(lower.begin(), lower.end(), ::isspace), lower.end());
        
         for (int i = 0; i < chat.size(); ++i)
             if (lower.find(chat[i]) != std::string::npos)
