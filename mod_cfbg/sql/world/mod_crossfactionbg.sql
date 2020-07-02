@@ -1,0 +1,5 @@
+INSERT INTO `module_config` (`config`, `value`, `comment`) VALUES
+	('CROSSFACTION_BG_ENABLE', '1', NULL),
+	('CROSSFACTION_REPLACE_RACIALS', '1', NULL),
+	('CROSSFACTION_REPLACE_LANG', '1', NULL);
+

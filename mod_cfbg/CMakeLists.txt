@@ -1,0 +1,3 @@
+AC_ADD_SCRIPT("${CMAKE_CURRENT_LIST_DIR}/src/CrossfactionBG.cpp")
+AC_ADD_SCRIPT("${CMAKE_CURRENT_LIST_DIR}/src/CrossfactionBG.h")
+AC_ADD_SCRIPT_LOADER("CrossfactionBG" "${CMAKE_CURRENT_LIST_DIR}/src/loader.h")
