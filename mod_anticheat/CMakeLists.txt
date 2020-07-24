@@ -1,0 +1,8 @@
+CU_SET_PATH("CMAKE_MOD_ANTICHEAT_DIR" "${CMAKE_CURRENT_LIST_DIR}")
+
+AC_ADD_SCRIPT("${CMAKE_CURRENT_LIST_DIR}/src/PassiveAnticheat.cpp")
+AC_ADD_SCRIPT("${CMAKE_CURRENT_LIST_DIR}/src/AnticheatMgr.cpp")
+AC_ADD_SCRIPT("${CMAKE_CURRENT_LIST_DIR}/src/AnticheatScripts.cpp")
+AC_ADD_SCRIPT("${CMAKE_CURRENT_LIST_DIR}/src/AnticheatData.cpp")
+
+AC_ADD_SCRIPT_LOADER("PassiveAnticheat" "${CMAKE_CURRENT_LIST_DIR}/src/loader.h")

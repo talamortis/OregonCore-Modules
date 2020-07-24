@@ -1,0 +1,18 @@
+INSERT INTO `module_config`(`config`, `value`, `comment`) VALUES 
+('Anticheat.Enabled', '1', NULL),
+( 'Anticheat.EnabledOnGmAccounts', '0', NULL),
+('Anticheat.ReportsForIngameWarnings', '70', NULL),
+('Anticheat.MaxReportsForDailyReport', '70', NULL),
+('Anticheat.LoginMessage', '1', NULL),
+('Anticheat.WriteLog', '0', NULL),
+('Anticheat.SaveReportsTime', '60', NULL),
+('Anticheat.DetectFlyHack', '1', NULL),
+('Anticheat.DetectWaterWalkHack', '1', NULL),
+('Anticheat.DetectJumpHack', '1', NULL),
+('Anticheat.DetectTelePlaneHack', '1', NULL),
+('Anticheat.DetectSpeedHack', '1', NULL),
+('Anticheat.DetectClimbHack', '0', NULL),
+('Anticheat.StricterFlyHackCheck', '0', NULL),
+('Anticheat.KickPlayerFlyHack', '0', NULL),
+('Anticheat.KickPlayerWaterWalkHack', '0', NULL),
+('Anticheat.KickPlayer.SpeedHack', '1', NULL);
