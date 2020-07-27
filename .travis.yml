@@ -32,7 +32,7 @@ before_install:
 install:
   - cd ..
   - git clone --depth=1 --branch=master https://github.com/talamortis/OregonCore.git oregoncore
-  - mv OregonCore-Modules/* oregoncore/modules/
+  - mv OregonCore-Modules/modules_scripts/* oregoncore/modules/
   - cd oregoncore
   - mkdir build
   - cd build
