@@ -1,7 +1,7 @@
 ![logo](https://avatars2.githubusercontent.com/u/14118733?s=400&v=4) Welcome to OregonCore!
 =================================================================================
 
-This repository is dedicated to all the oregoncore modules 
+This repository is dedicated to all the oregoncore modules & Eluna Scripts
 
 Build Status
 ------------
