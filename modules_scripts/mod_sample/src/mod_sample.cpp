@@ -1,5 +1,5 @@
 #include "ScriptMgr.h"
-#include "Config/Config.h"
+#include "Configuration/Config.h"
 #include "Player.h"
 #include "World.h"
 #include "Chat.h"
