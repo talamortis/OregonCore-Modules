@@ -1,0 +1,1 @@
+void Addguild_moneyScripts();
