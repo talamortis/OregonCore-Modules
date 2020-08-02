@@ -12,7 +12,7 @@ public:
     void OnLogin(Player* player, bool firstLogin) override
     {
         ChatHandler(player->GetSession()).SendSysMessage("Dynamic Module Is working!!");
-        std::string mod = sWorld.GetModuleStringConfig("modsample.stringtest");
+        std::string mod = sWorld.GetModuleStringConfig("modsample.stringtest", "The is the Sameple Module");
         uint32 number = sWorld.GetModuleIntConfig("modsample.intTest", 10032);
 
         if (sWorld.GetModuleBoolConfig("modsample.enableHelloWorld", "1"))
