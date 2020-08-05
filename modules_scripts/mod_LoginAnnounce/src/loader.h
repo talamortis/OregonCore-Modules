@@ -1,0 +1,1 @@
+void Addmod_LoginAnnounceScripts();
