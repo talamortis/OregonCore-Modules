@@ -13,6 +13,9 @@
 
 void AlphaRewards::OnLoginCheck(Player* player)
 {
+    if (!sWorld.GetModuleBoolConfig("Alpha.Rewards.Enable", true))
+        return;
+
     QueryResult_AutoPtr result = LoginDatabase.PQuery("SELECT `game_point` FROM `account` WHERE `id` = '%u' ", player->GetSession()->GetAccountId());
 
     if (!result)
@@ -25,6 +28,9 @@ void AlphaRewards::OnLoginCheck(Player* player)
 
 void AlphaRewards::OnLogoutUpdate(Player* player)
 {
+    if (!sWorld.GetModuleBoolConfig("Alpha.Rewards.Enable", true))
+        return;
+
     if (AlphaRewardData* data = player->CustomData.Get<AlphaRewardData>("RewardPointsMap"))
     {
         uint32 reward = data->RewardPointsMap;
@@ -39,6 +45,9 @@ void AlphaRewards::AddGamePoint(Player* player, uint32 game_point)
 
 void AlphaRewards::LoadAlphaRewardsTable()
 {
+    if (!sWorld.GetModuleBoolConfig("Alpha.Rewards.Enable", true))
+        return;
+
     sLog.outString("Loading Alpha Reward System...");
 
     QueryResult_AutoPtr result = WorldDatabase.PQuery("SELECT `Entry`, `TypeId`, `Points` FROM `alpha_reward_system`");
@@ -77,6 +86,8 @@ void AlphaRewards::LoadAlphaRewardsTable()
 
 void AlphaRewards::LoadAlphaRewardItemTable()
 {
+    if (!sWorld.GetModuleBoolConfig("Alpha.Rewards.Enable", true))
+        return;
 
     sLog.outString("Loading Alpha Rewards Item Table...");
 
@@ -111,6 +122,8 @@ void AlphaRewards::LoadAlphaRewardItemTable()
 
 void AlphaRewards::AddItemAndCheck(Player* player, uint32 item, uint32 quantity, uint32 points)
 {
+    if (!sWorld.GetModuleBoolConfig("Alpha.Rewards.Enable", true))
+        return;
 
      uint32& _points = player->CustomData.GetDefault<AlphaRewardData>("RewardPointsMap")->RewardPointsMap;
 

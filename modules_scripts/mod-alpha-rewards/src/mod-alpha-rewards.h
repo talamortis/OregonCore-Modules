@@ -47,7 +47,7 @@ public:
 
     void reset()
     {
-        timer = static_cast <uint32>(sWorld.GetModuleIntConfig("RewardPlayedTime", 2))* HOUR*IN_MILLISECONDS;
+        timer = static_cast <uint32>(sWorld.GetModuleIntConfig("Alpha.Reward.PlayedTime", 2))* HOUR*IN_MILLISECONDS;
     }
 };
 

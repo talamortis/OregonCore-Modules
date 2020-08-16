@@ -29,6 +29,13 @@ public:
 
     static bool handleViewCommand(ChatHandler* handler, char const* args)
     {
+        if (!sWorld.GetModuleBoolConfig("Alpha.Rewards.Enable", true))
+        {
+            handler->PSendSysMessage("Reward Module is currently disabled.");
+            return false;
+        }
+
+
         Player* player = handler->GetSession()->GetPlayer();
         Player* target = player->GetSelectedPlayer();
         bool IsGM = player->GetSession()->GetSecurity() >= SEC_GAMEMASTER;
@@ -77,6 +84,12 @@ public:
 
     static bool handleAddCommand(ChatHandler* handler, char const* args)
     {
+        if (!sWorld.GetModuleBoolConfig("Alpha.Rewards.Enable", true))
+        {
+            handler->PSendSysMessage("Reward Module is currently disabled.");
+            return false;
+        }
+
         Player* target = handler->getSelectedPlayer();
 
         char* accountName = strtok((char*)args, " ");

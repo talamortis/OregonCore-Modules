@@ -89,6 +89,9 @@ public:
     bool OnGossipHello(Player* player, Creature* creature)
     {
 
+        if (!sWorld.GetModuleBoolConfig("Alpha.Rewards.Enable", true))
+            return false;
+
         if (player->IsInCombat())
         {
             ChatHandler(player->GetSession()).PSendSysMessage("Please Leave combat before speaking to me!");
