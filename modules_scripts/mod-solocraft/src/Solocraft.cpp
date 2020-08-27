@@ -51,14 +51,14 @@ private:
     // Set the instance difficulty
     int CalculateDifficulty(Map* map, Player* /*player*/) {
         int difficulty = 1;
-        if (map) {
-            if (map->IsDungeon()) {
-                difficulty = sWorld.GetModuleIntConfig("Solocraft.Dungeon", 1);
-            } else if (map->IsHeroic()) {
-                difficulty = sWorld.GetModuleIntConfig("Solocraft.Heroic", 1);
-            } else if (map->IsRaid()) {
+        if (map)
+        {
+            if (map->IsRaid())
                 difficulty = sWorld.GetModuleIntConfig("Solocraft.Raid", 1);
-            }
+            else if (map->IsHeroic())
+                difficulty = sWorld.GetModuleIntConfig("Solocraft.Heroic", 1);
+            else if (map->IsDungeon())
+                difficulty = sWorld.GetModuleIntConfig("Solocraft.Dungeon", 1);
         }
         return difficulty;
     }
