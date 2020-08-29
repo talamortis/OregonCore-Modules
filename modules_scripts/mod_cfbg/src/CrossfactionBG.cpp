@@ -102,6 +102,15 @@ public:
         sCrossFaction.SetFakeValues(player);
     }
 
+
+    void OnLogout(Player* player)
+    {
+        if (!sWorld.GetModuleBoolConfig("CROSSFACTION_BG_ENABLE", true))
+            return;
+
+        if (player->GetMap()->IsBattleground())
+            player->LeaveBattleground(true);
+    }
 };
 
 void CFBG::FakeDisplayID(Player* player)
