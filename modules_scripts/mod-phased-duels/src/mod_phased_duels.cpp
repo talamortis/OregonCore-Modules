@@ -60,10 +60,10 @@ public:
                     continue;
 
                 // Phase players & pets, dont update visibility yet
-                firstplayer->SetPhaseMask(phase, false);
-                secondplayer->SetPhaseMask(phase, false);
+                firstplayer->SetPhaseMask(phase, false, false);
+                secondplayer->SetPhaseMask(phase, false, false);
                 // Phase duel flag
-                go->SetPhaseMask(phase, true);
+                go->SetPhaseMask(phase, true, false);
                 // Update visibility here so pets will be phased and wont despawn
                 firstplayer->UpdateObjectVisibility();
                 secondplayer->UpdateObjectVisibility();
@@ -82,8 +82,8 @@ public:
         if (sWorld.GetModuleBoolConfig("PhasedDueling.Enable", true))
         {
             // Phase players, dont update visibility yet
-            firstplayer->SetPhaseMask(GetNormalPhase(firstplayer), false);
-            secondplayer->SetPhaseMask(GetNormalPhase(secondplayer), false);
+            firstplayer->SetPhaseMask(GetNormalPhase(firstplayer), false, false);
+            secondplayer->SetPhaseMask(GetNormalPhase(secondplayer), false, false);
             // Update visibility here so pets will be phased and wont despawn
             firstplayer->UpdateObjectVisibility();
             secondplayer->UpdateObjectVisibility();
