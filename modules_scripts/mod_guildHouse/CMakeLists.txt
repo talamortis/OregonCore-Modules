@@ -1,0 +1,6 @@
+AC_ADD_SCRIPT("${CMAKE_CURRENT_LIST_DIR}/src/mod_npc_guildhouse.cpp")
+AC_ADD_SCRIPT("${CMAKE_CURRENT_LIST_DIR}/src/mod_guildhouse.cpp")
+AC_ADD_SCRIPT("${CMAKE_CURRENT_LIST_DIR}/src/mod_guildhouse.h")
+AC_ADD_SCRIPT("${CMAKE_CURRENT_LIST_DIR}/src/mod_item_guildhouse.cpp")
+AC_ADD_SCRIPT_LOADER("mod_guildhouse" "${CMAKE_CURRENT_LIST_DIR}/src/loader.h")
+AC_ADD_SCRIPT_LOADER("mod_guildhouseItem" "${CMAKE_CURRENT_LIST_DIR}/src/loader.h")
