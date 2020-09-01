@@ -20,7 +20,7 @@ public:
 
 void CreatePet(Player *player, Creature * m_creature, uint32 entry) {
 
-    if(sWorld.GetModuleBoolConfig("BeastMaster.OnlyHunter", true)) // Checks to see if Only Hunters can have pets.
+    if(!sWorld.GetModuleBoolConfig("BeastMaster.OnlyHunter", true)) // Checks to see if Only Hunters can have pets.
      {
         if(player->getClass() != CLASS_HUNTER) {
             m_creature->Whisper("You are not a Hunter!", LANG_UNIVERSAL, player);
