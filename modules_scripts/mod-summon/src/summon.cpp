@@ -5,10 +5,10 @@
 #include "World.h"
 #include "Chat.h"
 
-class summon : public ItemScript
+class Summon : public ItemScript
 {
         public:
-                summon() : ItemScript("summon")
+                Summon() : ItemScript("Summon")
                 {
                 }
                 bool OnUse(Player* pPlayer, Item* pItem, SpellCastTargets const& /*targets*/)
@@ -27,7 +27,7 @@ class summon : public ItemScript
   
    else if (pPlayer->FindNearestCreature(charEntry, 40) || pPlayer->FindNearestCreature(charEntry, 8))
    {
-        pPlayer->GetSession()->SendNotification("Flaming Legion Vortex can not be summoned right now. Another Vortex is nearby.");
+        pPlayer->GetSession()->SendNotification("Flaming Legion Vortex can not be Summoned right now. Another Vortex is nearby.");
    }
   
    else
@@ -63,8 +63,8 @@ public:
     }
 };
 
-void AddSC_summon()
+void AddSC_Summon()
 {
-        new summon();
+        new Summon();
         new Summon_Announce();
 }
