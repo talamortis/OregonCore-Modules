@@ -229,7 +229,7 @@ class LoadTeleNPCTable : public WorldScript
 public:
   LoadTeleNPCTable() : WorldScript("LoadTeleNPCTable") {}
 
-void OnLoadTeleNPCDatabaseTable()
+void OnLoadCustomDatabaseTable()
 {
     sLog.outString("Loading TeleNPC2...");
     LoadNpcTele();
