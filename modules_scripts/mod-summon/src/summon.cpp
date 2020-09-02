@@ -27,7 +27,7 @@ class Summon : public ItemScript
   
    else if (pPlayer->FindNearestCreature(charEntry, 40) || pPlayer->FindNearestCreature(charEntry, 8))
    {
-        pPlayer->GetSession()->SendNotification("Flaming Legion Vortex can not be Summoned right now. Another Vortex is nearby.");
+        pPlayer->GetSession()->SendNotification("Lithordean Vortex can not be Summoned right now. Another Vortex is nearby.");
    }
   
    else
