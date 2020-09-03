@@ -6,6 +6,7 @@
 #include "DataMap.h"
 #include "mod-alpha-rewards.h"
 #include "ace/ACE.h"
+#include "Group.h"
 
 class LoadAlphaRewardGlobal : public WorldScript
 {
@@ -58,6 +59,32 @@ public:
 
         if (it != sAlphaRewards->AlphaQuestPointsMap.end())
             sAlphaRewards->AddGamePoint(player, it->second);
+    }
+
+    void OnCreatureKill(Player* killer, Creature* killed) override
+    {
+        Group* grp = killer->GetGroup();
+        if (grp)
+        {
+            for (GroupReference* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
+            {
+                Player* member = itr->GetSource();
+                if (!member || !member->GetSession() || !member->IsWithinDist(killer, 25.0f))
+                    continue;
+
+                auto it = sAlphaRewards->AlphaCreaturePointsMap.find(killed->GetEntry());
+
+                if (it != sAlphaRewards->AlphaCreaturePointsMap.end())
+                    sAlphaRewards->AddGamePoint(member, it->second);
+            }
+        }
+        else
+        {
+            auto it = sAlphaRewards->AlphaCreaturePointsMap.find(killed->GetEntry());
+
+            if (it != sAlphaRewards->AlphaCreaturePointsMap.end())
+                sAlphaRewards->AddGamePoint(killer, it->second);
+        }
     }
 
     /*void OnAchiComplete(Player* player, AchievementEntry const* achievement) override
