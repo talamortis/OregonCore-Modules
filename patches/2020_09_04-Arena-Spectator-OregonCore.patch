@@ -1,0 +1,915 @@
+From 0248883515fd183e11269992cfcc49fa79f67b7c Mon Sep 17 00:00:00 2001
+From: LordPsyan <lordpsyan@gmail.com>
+Date: Fri, 4 Sep 2020 09:33:25 +0000
+Subject: [PATCH] 2020_09_04-Arena-Spectator-OregonCore
+
+---
+ sql/updates/world/1695_command_spstop.sql     |   1 +
+ .../game/Battlegrounds/Battleground.cpp       |  14 +-
+ .../game/Battlegrounds/BattlegroundMgr.h      |   4 +-
+ .../game/Entities/GameObject/GameObject.cpp   |   8 +
+ src/server/game/Entities/Player/Player.cpp    |  72 +++++-
+ src/server/game/Entities/Player/Player.h      |  13 +-
+ src/server/game/Entities/Unit/Unit.cpp        | 149 +++++++------
+ src/server/game/Handlers/ChatHandler.cpp      |  43 +++-
+ src/server/game/Handlers/MovementHandler.cpp  |   2 +-
+ src/server/game/Maps/Map.cpp                  |   6 +-
+ src/server/game/Scripting/ScriptLoader.cpp    |   4 +
+ src/server/game/Spells/Spell.cpp              |   4 +
+ src/server/scripts/Commands/cs_spectator.cpp  |  38 ++++
+ src/server/scripts/Custom/arena_spectator.cpp | 206 ++++++++++++++++++
+ 14 files changed, 481 insertions(+), 83 deletions(-)
+ create mode 100644 sql/updates/world/1695_command_spstop.sql
+ create mode 100644 src/server/scripts/Commands/cs_spectator.cpp
+ create mode 100644 src/server/scripts/Custom/arena_spectator.cpp
+
+diff --git a/sql/updates/world/1695_command_spstop.sql b/sql/updates/world/1695_command_spstop.sql
+new file mode 100644
+index 00000000..35fbc3a2
+--- /dev/null
++++ b/sql/updates/world/1695_command_spstop.sql
+@@ -0,0 +1 @@
++REPLACE INTO `command` VALUES ('spstop', 0, 'Syntax: .spstop\r\n\r\nCancel Arena Spectate.');
+diff --git a/src/server/game/Battlegrounds/Battleground.cpp b/src/server/game/Battlegrounds/Battleground.cpp
+index 27464cdf..4775aafd 100644
+--- a/src/server/game/Battlegrounds/Battleground.cpp
++++ b/src/server/game/Battlegrounds/Battleground.cpp
+@@ -1214,6 +1214,7 @@ void Battleground::AddPlayer(Player* plr)
+     sBattlegroundMgr.BuildPlayerJoinedBattlegroundPacket(&data, plr);
+     SendPacketToTeam(team, &data, plr, false);
+ 
++	plr->SetSpectator(false);
+     plr->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+     plr->CombatStop();
+     plr->getHostileRefManager().deleteReferences();
+@@ -1277,10 +1278,21 @@ void Battleground::EventPlayerLoggedOut(Player* player)
+     {
+         if (isBattleground())
+             EventPlayerDroppedFlag(player);
++            player->LeaveBattleground();
+     }
+ 
+     if (isArena())
+-        player->LeaveBattleground();
++    {
++        if (GetAlivePlayersCountByTeam(player->GetTeam()) <= 1 && GetPlayersCountByTeam(GetOtherTeam(player->GetTeam())))
++            EndBattleground(GetOtherTeam(player->GetTeam()));
++        if (!player->isSpectator())
++            player->LeaveBattleground();
++        else
++        {
++            player->SetSpectator(false);
++            player->LeaveBattleground();
++        }
++    }
+ }
+ 
+ /* This method should be called only once ... it adds pointer to queue */
+diff --git a/src/server/game/Battlegrounds/BattlegroundMgr.h b/src/server/game/Battlegrounds/BattlegroundMgr.h
+index 6a31d9f3..83a1cd19 100644
+--- a/src/server/game/Battlegrounds/BattlegroundMgr.h
++++ b/src/server/game/Battlegrounds/BattlegroundMgr.h
+@@ -264,10 +264,12 @@ class BattlegroundMgr
+         }
+ 
+         void SetHolidayWeekends(uint32 mask);
++
++        BattlegroundSet m_Battlegrounds;
+     private:
+ 
+         /* Battlegrounds */
+-        BattlegroundSet m_Battlegrounds;
++        //BattlegroundSet m_Battlegrounds;
+         uint32 m_MaxRatingDifference;
+         uint32 m_RatingDiscardTimer;
+         uint32 m_NextRatingDiscardUpdate;
+diff --git a/src/server/game/Entities/GameObject/GameObject.cpp b/src/server/game/Entities/GameObject/GameObject.cpp
+index 5a8e348c..1c169d31 100644
+--- a/src/server/game/Entities/GameObject/GameObject.cpp
++++ b/src/server/game/Entities/GameObject/GameObject.cpp
+@@ -453,6 +453,9 @@ void GameObject::Update(uint32 diff)
+ 
+                     if (ok)
+                     {
++						if (Player *tmpPlayer = ok->ToPlayer())
++                            if (tmpPlayer->isSpectator())
++                                return;
+                         // some traps do not have spell but should be triggered
+                         if (goInfo->trap.spellId)
+                             CastSpell(ok, goInfo->trap.spellId);
+@@ -1637,6 +1640,11 @@ void GameObject::SetLootRecipient(Unit* pUnit)
+ 
+ void GameObject::CastSpell(Unit* target, uint32 spellId, bool triggered /*= true*/)
+ {
++    if (target)
++        if (Player *tmpPlayer = target->ToPlayer())
++            if (tmpPlayer->isSpectator())
++                return;
++
+     SpellEntry const* spellProto = sSpellStore.LookupEntry(spellId);
+     if (!spellProto)
+         return;
+diff --git a/src/server/game/Entities/Player/Player.cpp b/src/server/game/Entities/Player/Player.cpp
+index e0eba758..b3fe61ac 100644
+--- a/src/server/game/Entities/Player/Player.cpp
++++ b/src/server/game/Entities/Player/Player.cpp
+@@ -477,6 +477,8 @@ Player::Player(WorldSession* session) : Unit(true), m_reputationMgr(this)
+ 
+     m_ExtraFlags = 0;
+ 
++	spectatorFlag = false;
++
+     // players always accept
+     if (GetSession()->GetSecurity() == SEC_PLAYER)
+         SetAcceptWhispers(true);
+@@ -2442,6 +2444,69 @@ bool Player::IsInAreaTriggerRadius(const AreaTriggerEntry* trigger) const
+     return true;
+ }
+ 
++void Player::SetSpectator(bool on)
++{
++	if (on)
++	{
++		CombatStop();
++		SetSpeed(MOVE_RUN, 2.0);
++
++		spectatorFlag = true;
++
++		RemoveArenaAuras();
++		RemoveAllEnchantments(TEMP_ENCHANTMENT_SLOT, true);
++
++		//m_ExtraFlags |= PLAYER_EXTRA_GM_ON;
++		SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
++		m_ExtraFlags |= PLAYER_EXTRA_GM_INVISIBLE; 
++		SetFaction(35);
++		SetGMVisible(false);
++		SetFFAPvP(false);
++
++		RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
++		RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT);
++		Pet* pet = GetPet();
++		if (pet)
++		{
++			if (pet->getPetType() == SUMMON_PET || pet->getPetType() == HUNTER_PET)
++			{
++				SetTemporaryUnsummonedPetNumber(pet->GetCharmInfo()->GetPetNumber());
++				SetOldPetSpell(pet->GetUInt32Value(UNIT_CREATED_BY_SPELL));
++			}
++			RemovePet(NULL,PET_SAVE_NOT_IN_SLOT);
++		}
++		else
++			SetTemporaryUnsummonedPetNumber(0);
++
++		ResetContestedPvP();
++
++		getHostileRefManager().setOnlineOfflineState(false);
++		CombatStopWithPets();
++
++		uint32 morphs[8] = {25900, 736, 20582};
++		SetDisplayId(morphs[urand(0, 2)]);
++	}
++    else
++    {
++		UpdateSpeed(MOVE_RUN, true);
++		spectatorFlag = false;
++		//m_ExtraFlags &= ~ PLAYER_EXTRA_GM_ON;
++		RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
++		m_ExtraFlags &= ~PLAYER_EXTRA_GM_INVISIBLE;
++        setFactionForRace(getRace());
++        SetGMVisible(true);
++
++        // restore FFA PvP Server state
++        if (sWorld.IsFFAPvPRealm())
++            SetFFAPvP(true);
++
++        getHostileRefManager().setOnlineOfflineState(true);
++        DeMorph();
++    }
++    UpdateObjectVisibility();
++
++
++}
+ void Player::SetGameMaster(bool on)
+ {
+     if (on)
+@@ -17330,7 +17395,7 @@ void Player::UpdateSpeakTime()
+ 
+ bool Player::CanSpeak() const
+ {
+-    return  GetSession()->m_muteTime <= time (NULL);
++	return GetSession()->m_muteTime <= time (NULL);
+ }
+ 
+ /*********************************************************/
+@@ -19143,7 +19208,7 @@ void Player::LeaveBattleground(bool teleportToEntryPoint)
+         bg->RemovePlayerAtLeave(GetGUID(), teleportToEntryPoint, true);
+ 
+         // call after remove to be sure that player resurrected for correct cast
+-        if (bg->isBattleground() && !IsGameMaster() && sWorld.getConfig(CONFIG_BATTLEGROUND_CAST_DESERTER))
++        if (bg->isBattleground() && !IsGameMaster() && !isSpectator() && sWorld.getConfig(CONFIG_BATTLEGROUND_CAST_DESERTER))
+         {
+             if (bg->GetStatus() == STATUS_IN_PROGRESS || bg->GetStatus() == STATUS_WAIT_JOIN)
+             {
+@@ -19253,6 +19318,9 @@ bool Player::IsVisibleGloballyFor(Player* u) const
+     if (IsVisible())
+         return true;
+ 
++	if (u->ToPlayer()->isSpectator() && isSpectator())
++		return false;
++
+     // GMs are visible for higher gms (or players are visible for gms)
+     if (u->GetSession()->GetSecurity() > SEC_PLAYER)
+         return GetSession()->GetSecurity() <= u->GetSession()->GetSecurity();
+diff --git a/src/server/game/Entities/Player/Player.h b/src/server/game/Entities/Player/Player.h
+index a0fb2d30..d1e81a5f 100644
+--- a/src/server/game/Entities/Player/Player.h
++++ b/src/server/game/Entities/Player/Player.h
+@@ -1075,6 +1075,13 @@ class Player : public Unit, public GridObject<Player>
+             else m_ExtraFlags &= ~PLAYER_EXTRA_PVP_DEATH;
+         }
+ 
++        bool isSpectator() const
++        {
++            return spectatorFlag;
++        }
++
++        void SetSpectator(bool on);
++
+         void GiveXP(uint32 xp, Unit* victim, bool disableRafBonus = false);
+         void GiveLevel(uint32 level, bool ignoreRAF = false);
+         void InitStatsForLevel(bool reapplyMods = false);
+@@ -1997,8 +2004,8 @@ class Player : public Unit, public GridObject<Player>
+         void SendDelayResponse(const uint32);
+         void SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 RestXP, bool RafBonus = false);
+ 
+-		uint8 LastSwingErrorMsg() const { return m_swingErrorMsg; }
+-		void SwingErrorMsg(uint8 val) { m_swingErrorMsg = val; }
++        uint8 LastSwingErrorMsg() const { return m_swingErrorMsg; }
++        void SwingErrorMsg(uint8 val) { m_swingErrorMsg = val; }
+ 
+         //notifiers
+         void SendAttackSwingCantAttack();
+@@ -2950,6 +2957,8 @@ class Player : public Unit, public GridObject<Player>
+ 
+         bool IsAlwaysDetectableFor(WorldObject const* seer) const override;
+ 
++        bool spectatorFlag;
++
+     private:
+         // internal common parts for CanStore/StoreItem functions
+         uint8 _CanStoreItem_InSpecificSlot(uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemTemplate const* pProto, uint32& count, bool swap, Item* pSrcItem) const;
+diff --git a/src/server/game/Entities/Unit/Unit.cpp b/src/server/game/Entities/Unit/Unit.cpp
+index a2fcfc9a..83649f91 100644
+--- a/src/server/game/Entities/Unit/Unit.cpp
++++ b/src/server/game/Entities/Unit/Unit.cpp
+@@ -537,7 +537,7 @@ void Unit::Update(uint32 p_time)
+         return;
+ 
+     _UpdateSpells(p_time);
+-	
++    
+ 
+ #ifdef ELUNA
+     elunaEvents->Update(p_time);
+@@ -578,77 +578,77 @@ void Unit::Update(uint32 p_time)
+ 
+ bool Unit::UpdateMeleeAttackingState()
+ {
+-	Unit *victim = GetVictim();
+-	if (!victim || IsNonMeleeSpellCast(false))
+-		return false;
++    Unit *victim = GetVictim();
++    if (!victim || IsNonMeleeSpellCast(false))
++        return false;
+ 
+-	if (!isAttackReady(BASE_ATTACK) && !(isAttackReady(OFF_ATTACK) && haveOffhandWeapon()))
+-		return false;
++    if (!isAttackReady(BASE_ATTACK) && !(isAttackReady(OFF_ATTACK) && haveOffhandWeapon()))
++        return false;
+ 
+-	uint8 swingError = 0;
+-	if (!IsWithinMeleeRange(victim))
+-	{
+-		setAttackTimer(BASE_ATTACK, 100);
+-		setAttackTimer(OFF_ATTACK, 100);
+-		swingError = 1;
+-	}
+-	//120 degrees of radiant range
+-	else if (!HasInArc(2 * M_PI / 3, victim))
+-	{
+-		setAttackTimer(BASE_ATTACK, 100);
+-		setAttackTimer(OFF_ATTACK, 100);
+-		swingError = 2;
+-	}
+-	else
+-	{
+-		if (isAttackReady(BASE_ATTACK))
+-		{
+-			// prevent base and off attack in same time, delay attack at 0.2 sec
+-			if (haveOffhandWeapon())
+-			{
+-				if (getAttackTimer(OFF_ATTACK) < ATTACK_DISPLAY_DELAY)
+-					setAttackTimer(OFF_ATTACK, ATTACK_DISPLAY_DELAY);
+-			}
+-			AttackerStateUpdate(victim, BASE_ATTACK);
+-			resetAttackTimer(BASE_ATTACK);
+-		}
+-		if (haveOffhandWeapon() && isAttackReady(OFF_ATTACK))
+-		{
+-			// prevent base and off attack in same time, delay attack at 0.2 sec
+-			uint32 base_att = getAttackTimer(BASE_ATTACK);
+-			if (base_att < ATTACK_DISPLAY_DELAY)
+-				setAttackTimer(BASE_ATTACK, ATTACK_DISPLAY_DELAY);
+-			// do attack
+-			AttackerStateUpdate(victim, OFF_ATTACK);
+-			resetAttackTimer(OFF_ATTACK);
+-		}
+-	}
++    uint8 swingError = 0;
++    if (!IsWithinMeleeRange(victim))
++    {
++        setAttackTimer(BASE_ATTACK, 100);
++        setAttackTimer(OFF_ATTACK, 100);
++        swingError = 1;
++    }
++    //120 degrees of radiant range
++    else if (!HasInArc(2 * M_PI / 3, victim))
++    {
++        setAttackTimer(BASE_ATTACK, 100);
++        setAttackTimer(OFF_ATTACK, 100);
++        swingError = 2;
++    }
++    else
++    {
++        if (isAttackReady(BASE_ATTACK))
++        {
++            // prevent base and off attack in same time, delay attack at 0.2 sec
++            if (haveOffhandWeapon())
++            {
++                if (getAttackTimer(OFF_ATTACK) < ATTACK_DISPLAY_DELAY)
++                    setAttackTimer(OFF_ATTACK, ATTACK_DISPLAY_DELAY);
++            }
++            AttackerStateUpdate(victim, BASE_ATTACK);
++            resetAttackTimer(BASE_ATTACK);
++        }
++        if (haveOffhandWeapon() && isAttackReady(OFF_ATTACK))
++        {
++            // prevent base and off attack in same time, delay attack at 0.2 sec
++            uint32 base_att = getAttackTimer(BASE_ATTACK);
++            if (base_att < ATTACK_DISPLAY_DELAY)
++                setAttackTimer(BASE_ATTACK, ATTACK_DISPLAY_DELAY);
++            // do attack
++            AttackerStateUpdate(victim, OFF_ATTACK);
++            resetAttackTimer(OFF_ATTACK);
++        }
++    }
+ 
+-	Player* player = (GetTypeId() == TYPEID_PLAYER ? (Player*)this : NULL);
+-	if (player && swingError != player->LastSwingErrorMsg())
+-	{
+-		if (swingError == 1)
+-			player->SendAttackSwingNotInRange();
+-		else if (swingError == 2)
+-			player->SendAttackSwingBadFacingAttack();
+-		player->SwingErrorMsg(swingError);
+-	}
++    Player* player = (GetTypeId() == TYPEID_PLAYER ? (Player*)this : NULL);
++    if (player && swingError != player->LastSwingErrorMsg())
++    {
++        if (swingError == 1)
++            player->SendAttackSwingNotInRange();
++        else if (swingError == 2)
++            player->SendAttackSwingBadFacingAttack();
++        player->SwingErrorMsg(swingError);
++    }
+ 
+-	return swingError == 0;
++    return swingError == 0;
+ }
+ 
+ bool Unit::haveOffhandWeapon() const
+ {
+-	if (GetTypeId() == TYPEID_PLAYER)
+-		return ((Player*)this)->GetWeaponForAttack(OFF_ATTACK, true);
+-	else
+-	{
+-		uint8 itemClass = GetByteValue(UNIT_VIRTUAL_ITEM_INFO + (1 * 2) + 0, VIRTUAL_ITEM_INFO_0_OFFSET_CLASS);
+-		if (itemClass == ITEM_CLASS_WEAPON)
+-			return true;
++    if (GetTypeId() == TYPEID_PLAYER)
++        return ((Player*)this)->GetWeaponForAttack(OFF_ATTACK, true);
++    else
++    {
++        uint8 itemClass = GetByteValue(UNIT_VIRTUAL_ITEM_INFO + (1 * 2) + 0, VIRTUAL_ITEM_INFO_0_OFFSET_CLASS);
++        if (itemClass == ITEM_CLASS_WEAPON)
++            return true;
+ 
+-		return false;
+-	}
++        return false;
++    }
+ 
+     return CanDualWield();
+ }
+@@ -7397,11 +7397,19 @@ ReputationRank Unit::GetFactionReactionTo(FactionTemplateEntry const* factionTem
+ 
+ bool Unit::IsHostileTo(Unit const* unit) const
+ {
++    // Fix Me
++    //if (pTester->isSpectator() || pTarget->isSpectator())
++        //return false;
++
+     return GetReactionTo(unit) <= REP_HOSTILE;
+ }
+ 
+ bool Unit::IsFriendlyTo(Unit const* unit) const
+ {
++    // Fix Me
++    //if (pTester->isSpectator() || pTarget->isSpectator())
++        //return true;
++
+     return GetReactionTo(unit) >= REP_FRIENDLY;
+ }
+ 
+@@ -7474,6 +7482,15 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
+     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
+         return false;
+ 
++	if (GetTypeId() == TYPEID_PLAYER && ToPlayer()->isSpectator())
++		return false;
++
++	if (victim->GetTypeId() == TYPEID_PLAYER)
++	{
++		if (victim->ToPlayer()->isSpectator())
++			return false;
++	}
++
+     // nobody can attack GM in GM-mode
+     if (victim->GetTypeId() == TYPEID_PLAYER)
+     {
+@@ -12936,9 +12953,9 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
+         }
+         // Call KilledUnit for creatures
+         if (GetTypeId() == TYPEID_UNIT && ToCreature()->IsAIEnabled)
+-		{
++        {
+             ToCreature()->AI()->KilledUnit(victim);
+-			
++            
+ 
+ #ifdef ELUNA
+             if (Creature* killer = ToCreature())
+@@ -12997,7 +13014,7 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
+             ToCreature()->AI()->KilledUnit(victim);
+         else if (Guardian* pPet = GetGuardianPet())
+             pPet->AI()->KilledUnit(victim);
+-		
++        
+  
+ #ifdef ELUNA
+        if (GetTypeId() == TYPEID_PLAYER)
+diff --git a/src/server/game/Handlers/ChatHandler.cpp b/src/server/game/Handlers/ChatHandler.cpp
+index 0fd9df30..1720dad4 100644
+--- a/src/server/game/Handlers/ChatHandler.cpp
++++ b/src/server/game/Handlers/ChatHandler.cpp
+@@ -117,7 +117,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
+                 return;
+             }
+ 
+-			sScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg);
++            sScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg);
+ 
+             sLog.outChat("[ADDON] Player %s sends: %s",
+                          GetPlayer()->GetName(), msg.c_str());
+@@ -247,33 +247,51 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
+ 
+             if (type == CHAT_MSG_SAY)
+             {
+-			
++            
+ #ifdef ELUNA
+                 if (!sEluna->OnChat(GetPlayer(), type, lang, msg))
+                     return;
+ #endif
+ 
+-                GetPlayer()->Say(msg, lang);
++                if (GetPlayer()->isSpectator())
++                {
++                    SendNotification("You can not Speak in this Channel when Spectate Arena Match. Use another Channel!");
++                    return;
++                }
++                else
++                    GetPlayer()->Say(msg, lang);
+             }
+             else if (type == CHAT_MSG_EMOTE)
+             {
+-			
++            
+ #ifdef ELUNA
+                 if (!sEluna->OnChat(GetPlayer(), type, LANG_UNIVERSAL, msg))
+                     return;
+ #endif
+ 
+-                GetPlayer()->TextEmote(msg);
++                if (GetPlayer()->isSpectator())
++                {
++                    SendNotification("You can not Speak in this Channel when Spectate Arena Match. Use another Channel!");
++                    return;
++                }
++                else
++                    GetPlayer()->TextEmote(msg);
+             }
+             else if (type == CHAT_MSG_YELL)
+             {
+-			
++            
+ #ifdef ELUNA
+                 if (!sEluna->OnChat(GetPlayer(), type, lang, msg))
+                     return;
+ #endif
+ 
+-                GetPlayer()->Yell(msg, lang);
++                if (GetPlayer()->isSpectator())
++                {
++                    SendNotification("You can not Speak in this Channel when Spectate Arena Match. Use another Channel!");
++                    return;
++                }
++                else
++                    GetPlayer()->Yell(msg, lang);
+             }
+         }
+         break;
+@@ -334,8 +352,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
+                 if (!group || group->isBGGroup())
+                     return;
+             }
+-			
+-#ifdef ELUNA		
++            
++#ifdef ELUNA        
+             // used by eluna
+             if (!sEluna->OnChat(GetPlayer(), type, lang, msg, group))
+                 return;
+@@ -662,6 +680,13 @@ void WorldSession::HandleTextEmoteOpcode(WorldPacket& recv_data)
+         return;
+     }
+ 
++    if (_player->isSpectator())
++    {
++        SendNotification("You can not Speak in this Channel when Spectate Arena Match. Use another Channel!");
++        return;
++    }
++
++
+     uint32 text_emote, emoteNum;
+     uint64 guid;
+ 
+diff --git a/src/server/game/Handlers/MovementHandler.cpp b/src/server/game/Handlers/MovementHandler.cpp
+index f39f430a..39e75687 100644
+--- a/src/server/game/Handlers/MovementHandler.cpp
++++ b/src/server/game/Handlers/MovementHandler.cpp
+@@ -72,7 +72,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
+     ASSERT(oldMap);
+     if (GetPlayer()->IsInWorld())
+     {
+-        sLog.outError("Crash alert! Player is still in world when teleported from map %u! to new map %u", oldMap->GetId(), loc.GetMapId());
++        //sLog.outError("Crash alert! Player is still in world when teleported from map %u! to new map %u", oldMap->GetId(), loc.GetMapId());
+         oldMap->RemovePlayerFromMap(GetPlayer(), false);
+     }
+ 
+diff --git a/src/server/game/Maps/Map.cpp b/src/server/game/Maps/Map.cpp
+index 4648f110..ce323f09 100644
+--- a/src/server/game/Maps/Map.cpp
++++ b/src/server/game/Maps/Map.cpp
+@@ -2497,7 +2497,7 @@ void InstanceMap::CreateInstanceData(bool load)
+ {
+     if (i_data != NULL)
+         return;
+-		
++        
+ #ifdef ELUNA
+     i_data = sEluna->GetInstanceData(this);
+ 
+@@ -2720,7 +2720,11 @@ void BattlegroundMap::RemoveAllPlayers()
+         for (MapRefManager::iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
+             if (Player* plr = itr->GetSource())
+                 if (!plr->IsBeingTeleportedFar())
++                {
+                     plr->TeleportTo(plr->GetBattlegroundEntryPoint());
++                    if (plr->isSpectator())
++                        plr->SetSpectator(false);
++                }
+ 
+ }
+ 
+diff --git a/src/server/game/Scripting/ScriptLoader.cpp b/src/server/game/Scripting/ScriptLoader.cpp
+index 6c5d8d1a..6449e484 100644
+--- a/src/server/game/Scripting/ScriptLoader.cpp
++++ b/src/server/game/Scripting/ScriptLoader.cpp
+@@ -23,6 +23,7 @@
+ //void AddSC_custom_example();
+ //void AddSC_custom_gossip_codebox();
+ //void AddSC_test();
++void AddSC_npc_arena_spectator();
+ void AddModuleScripts();
+ //world
+ void AddSC_areatrigger_scripts();
+@@ -424,6 +425,7 @@ void AddSC_group_commandscript();
+ void AddSC_pet_commandscript();
+ void AddSC_pdump_commandscript();
+ void AddSC_gameobject_commandscript();
++void AddSC_spectator_commandscript();
+ 
+ void AddScripts()
+ {
+@@ -431,6 +433,7 @@ void AddScripts()
+     //    AddSC_custom_example();
+     //    AddSC_custom_gossip_codebox();
+     //    AddSC_test();
++    AddSC_npc_arena_spectator();
+     AddModuleScripts();
+     AddSC_areatrigger_scripts();
+     AddSC_boss_emeriss();
+@@ -829,5 +832,6 @@ void AddScripts()
+     AddSC_pet_commandscript();
+     AddSC_pdump_commandscript();
+     AddSC_gameobject_commandscript();
++    AddSC_spectator_commandscript();
+ }
+ 
+diff --git a/src/server/game/Spells/Spell.cpp b/src/server/game/Spells/Spell.cpp
+index 021bd6d7..15d575c7 100644
+--- a/src/server/game/Spells/Spell.cpp
++++ b/src/server/game/Spells/Spell.cpp
+@@ -3842,6 +3842,10 @@ SpellCastResult Spell::CheckCast(bool strict)
+             return SPELL_FAILED_ONLY_INDOORS;
+     }
+ 
++	if (Player *tmpPlayer = m_caster->ToPlayer())
++    if (tmpPlayer->isSpectator())
++        return SPELL_FAILED_SPELL_UNAVAILABLE;
++
+     // only check at first call, Stealth auras are already removed at second call
+     // for now, ignore triggered spells
+     if (strict && !m_IsTriggeredSpell)
+diff --git a/src/server/scripts/Commands/cs_spectator.cpp b/src/server/scripts/Commands/cs_spectator.cpp
+new file mode 100644
+index 00000000..2f303cc7
+--- /dev/null
++++ b/src/server/scripts/Commands/cs_spectator.cpp
+@@ -0,0 +1,38 @@
++#include "ScriptMgr.h"
++#include "Chat.h"
++#include "ChannelMgr.h"
++#include "Language.h"
++#include "Player.h"
++
++class spectator_commandscript : public CommandScript
++{
++public:
++    spectator_commandscript() : CommandScript("spectator_commandscript") { }
++
++    std::vector<ChatCommand> GetCommands() const override
++    {
++        static std::vector<ChatCommand> commandTable =
++        {
++            { "spstop",         SEC_PLAYER,         true,  &HandleSpectatorStopCommand,        "" },
++
++        };
++        return commandTable;
++    }
++
++static bool HandleSpectatorStopCommand(ChatHandler* handler, const char* args)
++{
++	Player *plr = handler->GetSession()->GetPlayer();
++
++	if (plr->isSpectator())
++	{
++		plr->TeleportTo(plr->GetBattlegroundEntryPoint());
++		plr->SetSpectator(false);
++	}
++	return true;
++}
++};
++
++void AddSC_spectator_commandscript()
++{
++    new spectator_commandscript();
++}
+\ No newline at end of file
+diff --git a/src/server/scripts/Custom/arena_spectator.cpp b/src/server/scripts/Custom/arena_spectator.cpp
+new file mode 100644
+index 00000000..ae2778fa
+--- /dev/null
++++ b/src/server/scripts/Custom/arena_spectator.cpp
+@@ -0,0 +1,206 @@
++#include "ScriptPCH.h"
++#include "BattlegroundMgr.h"
++#include "Chat.h"
++
++class npc_arena_spectator : public CreatureScript
++{
++public:
++    npc_arena_spectator() : CreatureScript("npc_arena_spectator") {}
++
++bool GossipHello_npc_arena_spectator(Player *pPlayer, Creature *pCreature)
++{
++	pPlayer->ADD_GOSSIP_ITEM(0, "Show List of Games above 1800 Rating", GOSSIP_SENDER_MAIN, 1000);
++	pPlayer->ADD_GOSSIP_ITEM(0, "Show List of Games below 1800 Rating", GOSSIP_SENDER_MAIN, 2000);
++	
++	pPlayer->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, pCreature->GetGUID());
++	return true;
++}
++
++std::string GetClassNameById(uint8 id)
++{
++    std::string sClass = "";
++    switch (id)
++    {
++        case CLASS_WARRIOR:         sClass = "War ";        break;
++        case CLASS_PALADIN:         sClass = "Pala ";           break;
++        case CLASS_HUNTER:          sClass = "Hunt ";           break;
++        case CLASS_ROGUE:           sClass = "Rog ";          break;
++        case CLASS_PRIEST:          sClass = "Prst ";         break;
++        case CLASS_DEATH_KNIGHT:    sClass = "DK ";             break;
++        case CLASS_SHAMAN:          sClass = "Sham ";          break;
++        case CLASS_MAGE:            sClass = "Mag ";           break;
++        case CLASS_WARLOCK:         sClass = "Wrlk ";        break;
++        case CLASS_DRUID:           sClass = "Dru ";          break;
++    }
++    return sClass;
++}
++
++std::string GetGamesStringData(Battleground *bg, uint32 rating)
++{
++	std::string teamsMember[BG_TEAMS_COUNT];
++    uint32 firstTeamId = 0;
++    for (Battleground::BattlegroundPlayerMap::const_iterator itr = bg->GetPlayers().begin(); itr != bg->GetPlayers().end(); ++itr)
++        if (Player* player = ObjectAccessor::FindPlayer(itr->first))
++            {
++                uint32 team = itr->second.Team;
++                if (!firstTeamId)
++                    firstTeamId = team;
++
++                teamsMember[firstTeamId == team] += GetClassNameById(player->getClass());
++            }
++
++    std::string data = teamsMember[0] + " - ";
++    std::stringstream ss;
++    ss << rating;
++    data += ss.str();
++    data += " - " + teamsMember[1];
++    return data;
++}
++
++uint64 GetFirstPlayerGuid(Battleground *bg)
++{
++    for (Battleground::BattlegroundPlayerMap::const_iterator itr = bg->GetPlayers().begin(); itr != bg->GetPlayers().end(); ++itr)
++	{
++        if (Player* pPlayer = ObjectAccessor::FindPlayer(itr->first))
++			return pPlayer->GetGUID();
++		else
++			return 0;
++	}
++	return 0;
++}
++
++void ShowPage (Player *pPlayer, Creature* pCreature, uint32 pages, bool isTop)
++{
++	uint32 highGames = 0;
++	uint32 lowGames = 0;
++	uint32 gamesOnPage = 20;
++	bool nextPage = false;
++	for (BattlegroundSet::iterator itr = sBattlegroundMgr.m_Battlegrounds.begin(); itr != sBattlegroundMgr.m_Battlegrounds.end(); ++itr)
++	{
++		Battleground * bg = itr->second;
++		if (bg->isArena() && bg->isRated())
++		{
++			if (Player * aPlayer = ObjectAccessor::FindPlayer(GetFirstPlayerGuid(bg)))
++			{
++				uint32 rating = aPlayer->GetMaxPersonalArenaRatingRequirement();
++				if (isTop && rating >= 1800)
++				{
++					++highGames;
++					if (highGames > (pages + 1) * gamesOnPage)
++						nextPage = true;
++					if (highGames >= pages * gamesOnPage)
++						pPlayer->ADD_GOSSIP_ITEM(0, GetGamesStringData(bg, rating), GOSSIP_SENDER_MAIN, (3000 + GetFirstPlayerGuid(bg)));
++				}
++				else if (!isTop && rating < 1800)
++				{
++					++lowGames;
++					if (lowGames > (pages + 1) * gamesOnPage)
++						nextPage = true;
++					if (lowGames >= pages * gamesOnPage)
++						pPlayer->ADD_GOSSIP_ITEM(0, GetGamesStringData(bg, rating), GOSSIP_SENDER_MAIN, (3000 + GetFirstPlayerGuid(bg)));
++				}
++			}
++			/*else
++			{
++				pPlayer->ADD_GOSSIP_ITEM(0, "No Rated Arena Games Now!!!", GOSSIP_SENDER_MAIN, (3000 + GetFirstPlayerGuid(bg)));
++			}*/
++		}
++	}
++	if (pages > 0)
++		pPlayer->ADD_GOSSIP_ITEM(0, "Prev Page...", GOSSIP_SENDER_MAIN, 1000 + pages - 1);
++	if (nextPage)
++		pPlayer->ADD_GOSSIP_ITEM(0, "Next Page...", GOSSIP_SENDER_MAIN, 1000 + pages + 1);
++}
++
++bool GossipSelect_npc_arena_spectator(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
++{
++	pPlayer->PlayerTalkClass->ClearMenus();
++	if (uiAction >= 1000 && uiAction < 2000)
++	{
++		ShowPage(pPlayer, pCreature, uiAction - 1000, true);
++		pPlayer->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, pCreature->GetGUID());
++	}
++	else if (uiAction >= 2000 && uiAction < 3000)
++	{
++		ShowPage(pPlayer, pCreature, uiAction - 2000, false);
++		pPlayer->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, pCreature->GetGUID());
++	}
++	else
++	{
++		pPlayer->CLOSE_GOSSIP_MENU();
++
++		// Взять игрока для просмотра
++		uint64 guid = (uiAction - 3000);
++		if (Player *pTarget = ObjectAccessor::FindPlayer(guid))
++			{
++			if (pTarget->GetMap()->IsBattlegroundOrArena())
++			{
++				// Невозможно просматривать арену в которой являешься участником.
++				uint32 bgInstId = pTarget->GetBattleground()->GetInstanceID();
++				if (pPlayer->IsInvitedForBattlegroundInstance(bgInstId))
++				{
++					pPlayer->CLOSE_GOSSIP_MENU();
++					pCreature->MonsterWhisper("You have INVITED to this Arena match! Can not spectater yourself.", pPlayer->GetGUID());
++					return true;
++				}
++
++				pPlayer->SetBattlegroundId(pTarget->GetBattlegroundId());
++				// remember current position as entry point for return at bg end teleportation
++				if (!pPlayer->GetMap()->IsBattlegroundOrArena())
++					pPlayer->SetBattlegroundEntryPoint();
++
++				// stop flight if need
++				if (pPlayer->IsInFlight())
++				{
++					pPlayer->GetMotionMaster()->MovementExpired();
++					pPlayer->CleanupAfterTaxiFlight();
++				}
++				// save only in non-flight case
++				else
++					pPlayer->SaveRecallPosition();
++
++				// to point to see at pTarget with same orientation
++				float x,y,z;
++				pTarget->GetContactPoint(pPlayer,x,y,z);
++
++				if (pPlayer->GetPet())
++				{
++					if (pPlayer->GetPet()->getPetType() == SUMMON_PET || pPlayer->GetPet()->getPetType() == HUNTER_PET)
++					{
++						pPlayer->SetTemporaryUnsummonedPetNumber(pPlayer->GetPet()->GetCharmInfo()->GetPetNumber());
++						pPlayer->SetOldPetSpell(pPlayer->GetPet()->GetUInt32Value(UNIT_CREATED_BY_SPELL));
++					}
++					pPlayer->RemovePet(NULL,PET_SAVE_NOT_IN_SLOT);
++				}
++				else
++					pPlayer->SetTemporaryUnsummonedPetNumber(0);
++
++				pPlayer->TeleportTo(pTarget->GetMapId(), x, y, z, pPlayer->GetAngle(pTarget), TELE_TO_GM_MODE);
++
++				pPlayer->SetSpectator(true);
++
++				pCreature->MonsterWhisper("You can Cancel Spectate! Use command .SPSTOP", pPlayer->GetGUID());
++				return true;
++			}
++			else
++			{
++				pPlayer->CLOSE_GOSSIP_MENU();
++				pCreature->MonsterWhisper("Players not in Arena Now!!!", pPlayer->GetGUID());
++				return true;
++			}
++		}
++		else
++		{
++			pPlayer->CLOSE_GOSSIP_MENU();
++			pCreature->MonsterWhisper("Can not Find Target Players!!!", pPlayer->GetGUID());
++			return true;
++		}
++	}
++	return true;
++}
++};
++
++void AddSC_npc_arena_spectator() // Регистрация скрипта
++{
++    new npc_arena_spectator();
++}
+\ No newline at end of file
+-- 
+2.20.1
+
