@@ -454,4 +454,5 @@ public:
 void AddSC_BuffNPC()
 {
     new BuffNPC();
+	new BuffNPC_Announce();
 }
