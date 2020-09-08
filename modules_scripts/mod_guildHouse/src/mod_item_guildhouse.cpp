@@ -169,6 +169,12 @@ public:
             return;
         }
 
+        if (player->GetPhaseMask() != fields[2].GetUInt32())
+        {
+            ChatHandler(player).PSendSysMessage("You can only remove Objects in your guildHouse Phase!");
+            return;
+        }
+
         if (!code)
             return;
 
