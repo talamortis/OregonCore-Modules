@@ -126,8 +126,8 @@ bool showBuyList(Player *player, Creature *_creature, uint32 showFromId = 0)
 
  //send comment as a gossip item
  //transmit guildhouseId in Action variable
- player->ADD_GOSSIP_ITEM(ICON_GOSSIP_TABARD, comment, GOSSIP_SENDER_MAIN,
- guildhouseId + OFFSET_GH_ID_TO_ACTION);
+ //player->ADD_GOSSIP_ITEM(ICON_GOSSIP_TABARD, comment, GOSSIP_SENDER_MAIN, guildhouseId + OFFSET_GH_ID_TO_ACTION);
+ player->ADD_GOSSIP_ITEM_EXTENDED(ICON_GOSSIP_TABARD, comment, GOSSIP_SENDER_MAIN, guildhouseId + OFFSET_GH_ID_TO_ACTION, "Are you sure you want to purchase this Guild house?", 0, false);
  }
  while (result->NextRow());
 
@@ -135,8 +135,7 @@ bool showBuyList(Player *player, Creature *_creature, uint32 showFromId = 0)
  {
  //assume that we have additional page
  //add link to next GOSSIP_COUNT_MAX items
- player->ADD_GOSSIP_ITEM(ICON_GOSSIP_BALOONDOTS, MSG_GOSSIP_NEXTPAGE, GOSSIP_SENDER_MAIN,
- guildhouseId + OFFSET_SHOWBUY_FROM);
+ player->ADD_GOSSIP_ITEM(ICON_GOSSIP_BALOONDOTS, MSG_GOSSIP_NEXTPAGE, GOSSIP_SENDER_MAIN, guildhouseId + OFFSET_SHOWBUY_FROM);
  }
 
  player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, _creature->GetGUID());
@@ -294,8 +293,7 @@ bool OnGossipHello(Player *player, Creature *_creature)
  if (isPlayerHasGuildhouse(player, _creature))
  {
  //and additional for guildhouse owner (Removed :
- player->ADD_GOSSIP_ITEM(ICON_GOSSIP_GOLD, MSG_GOSSIP_SELL, GOSSIP_SENDER_MAIN, ACTION_SELL_GUILDHOUSE);
-
+ player->ADD_GOSSIP_ITEM_EXTENDED(ICON_GOSSIP_GOLD, MSG_GOSSIP_SELL, GOSSIP_SENDER_MAIN, ACTION_SELL_GUILDHOUSE, MSG_SELL_CONFIRM, 0, false);
  }
  else
  {
