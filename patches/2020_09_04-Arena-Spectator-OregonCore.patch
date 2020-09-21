@@ -1,12 +1,6 @@
-<<<<<<< HEAD
 From fee9e406af316f26e79ad5759d16050a8df23844 Mon Sep 17 00:00:00 2001
 From: LordPsyan <lordpsyan@gmail.com>
 Date: Tue, 8 Sep 2020 05:20:50 +0000
-=======
-From 0248883515fd183e11269992cfcc49fa79f67b7c Mon Sep 17 00:00:00 2001
-From: LordPsyan <lordpsyan@gmail.com>
-Date: Fri, 4 Sep 2020 09:33:25 +0000
->>>>>>> master
 Subject: [PATCH] 2020_09_04-Arena-Spectator-OregonCore
 
 ---
@@ -265,17 +259,10 @@ index a0fb2d30..d1e81a5f 100644
          // internal common parts for CanStore/StoreItem functions
          uint8 _CanStoreItem_InSpecificSlot(uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemTemplate const* pProto, uint32& count, bool swap, Item* pSrcItem) const;
 diff --git a/src/server/game/Entities/Unit/Unit.cpp b/src/server/game/Entities/Unit/Unit.cpp
-<<<<<<< HEAD
-index c2c18508..82366da9 100644
---- a/src/server/game/Entities/Unit/Unit.cpp
-+++ b/src/server/game/Entities/Unit/Unit.cpp
-@@ -538,7 +538,7 @@ void Unit::Update(uint32 p_time)
-=======
 index a2fcfc9a..83649f91 100644
 --- a/src/server/game/Entities/Unit/Unit.cpp
 +++ b/src/server/game/Entities/Unit/Unit.cpp
 @@ -537,7 +537,7 @@ void Unit::Update(uint32 p_time)
->>>>>>> master
          return;
  
      _UpdateSpells(p_time);
@@ -284,11 +271,7 @@ index a2fcfc9a..83649f91 100644
  
  #ifdef ELUNA
      elunaEvents->Update(p_time);
-<<<<<<< HEAD
-@@ -579,77 +579,77 @@ void Unit::Update(uint32 p_time)
-=======
 @@ -578,77 +578,77 @@ void Unit::Update(uint32 p_time)
->>>>>>> master
  
  bool Unit::UpdateMeleeAttackingState()
  {
@@ -428,11 +411,7 @@ index a2fcfc9a..83649f91 100644
  
      return CanDualWield();
  }
-<<<<<<< HEAD
-@@ -7399,11 +7399,19 @@ ReputationRank Unit::GetFactionReactionTo(FactionTemplateEntry const* factionTem
-=======
 @@ -7397,11 +7397,19 @@ ReputationRank Unit::GetFactionReactionTo(FactionTemplateEntry const* factionTem
->>>>>>> master
  
  bool Unit::IsHostileTo(Unit const* unit) const
  {
@@ -452,11 +431,7 @@ index a2fcfc9a..83649f91 100644
      return GetReactionTo(unit) >= REP_FRIENDLY;
  }
  
-<<<<<<< HEAD
-@@ -7476,6 +7484,15 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
-=======
 @@ -7474,6 +7482,15 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
->>>>>>> master
      if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
          return false;
  
@@ -472,11 +447,7 @@ index a2fcfc9a..83649f91 100644
      // nobody can attack GM in GM-mode
      if (victim->GetTypeId() == TYPEID_PLAYER)
      {
-<<<<<<< HEAD
-@@ -12938,9 +12955,9 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
-=======
 @@ -12936,9 +12953,9 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
->>>>>>> master
          }
          // Call KilledUnit for creatures
          if (GetTypeId() == TYPEID_UNIT && ToCreature()->IsAIEnabled)
@@ -488,11 +459,7 @@ index a2fcfc9a..83649f91 100644
  
  #ifdef ELUNA
              if (Creature* killer = ToCreature())
-<<<<<<< HEAD
-@@ -12999,7 +13016,7 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
-=======
 @@ -12997,7 +13014,7 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
->>>>>>> master
              ToCreature()->AI()->KilledUnit(victim);
          else if (Guardian* pPet = GetGuardianPet())
              pPet->AI()->KilledUnit(victim);
@@ -671,17 +638,10 @@ index 6c5d8d1a..6449e484 100644
  }
  
 diff --git a/src/server/game/Spells/Spell.cpp b/src/server/game/Spells/Spell.cpp
-<<<<<<< HEAD
-index 52c41606..83797207 100644
---- a/src/server/game/Spells/Spell.cpp
-+++ b/src/server/game/Spells/Spell.cpp
-@@ -3844,6 +3844,10 @@ SpellCastResult Spell::CheckCast(bool strict)
-=======
 index 021bd6d7..15d575c7 100644
 --- a/src/server/game/Spells/Spell.cpp
 +++ b/src/server/game/Spells/Spell.cpp
 @@ -3842,6 +3842,10 @@ SpellCastResult Spell::CheckCast(bool strict)
->>>>>>> master
              return SPELL_FAILED_ONLY_INDOORS;
      }
  
@@ -739,11 +699,7 @@ index 00000000..2f303cc7
 \ No newline at end of file
 diff --git a/src/server/scripts/Custom/arena_spectator.cpp b/src/server/scripts/Custom/arena_spectator.cpp
 new file mode 100644
-<<<<<<< HEAD
-index 00000000..0b3abe85
-=======
 index 00000000..ae2778fa
->>>>>>> master
 --- /dev/null
 +++ b/src/server/scripts/Custom/arena_spectator.cpp
 @@ -0,0 +1,206 @@
@@ -756,11 +712,7 @@ index 00000000..ae2778fa
 +public:
 +    npc_arena_spectator() : CreatureScript("npc_arena_spectator") {}
 +
-<<<<<<< HEAD
 +bool OnGossipHello(Player *pPlayer, Creature *pCreature)
-=======
-+bool GossipHello_npc_arena_spectator(Player *pPlayer, Creature *pCreature)
->>>>>>> master
 +{
 +	pPlayer->ADD_GOSSIP_ITEM(0, "Show List of Games above 1800 Rating", GOSSIP_SENDER_MAIN, 1000);
 +	pPlayer->ADD_GOSSIP_ITEM(0, "Show List of Games below 1800 Rating", GOSSIP_SENDER_MAIN, 2000);
@@ -865,11 +817,7 @@ index 00000000..ae2778fa
 +		pPlayer->ADD_GOSSIP_ITEM(0, "Next Page...", GOSSIP_SENDER_MAIN, 1000 + pages + 1);
 +}
 +
-<<<<<<< HEAD
 +bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
-=======
-+bool GossipSelect_npc_arena_spectator(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
->>>>>>> master
 +{
 +	pPlayer->PlayerTalkClass->ClearMenus();
 +	if (uiAction >= 1000 && uiAction < 2000)
