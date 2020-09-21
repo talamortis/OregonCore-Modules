@@ -276,7 +276,7 @@ public:
         case CLASS_HUNTER:
         {
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, "|cff00ff00|TInterface\\icons\\ability_marksmanship:30|t|r Use Markmanship Spec", GOSSIP_SENDER_MAIN, 21);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, "|cff00ff00|TInterface\\icons\\ability_hunter_beasttaming:30|t|r Use TemplateNPCy Spec", GOSSIP_SENDER_MAIN, 22);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, "|cff00ff00|TInterface\\icons\\ability_hunter_beasttaming:30|t|r Use Beastmastery Spec", GOSSIP_SENDER_MAIN, 22);
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, "|cff00ff00|TInterface\\icons\\ability_Hunter_swiftstrike:30|t|r Use Survival Spec", GOSSIP_SENDER_MAIN, 23);
         }
         break;
@@ -474,8 +474,8 @@ public:
             player->CLOSE_GOSSIP_MENU();
             break;
 
-        case 22: // Use TemplateNPCy Hunter Spec
-            sTemplateNpcMgr->sTalentsSpec = "TemplateNPCy";
+        case 22: // Use Beastmastery Hunter Spec
+            sTemplateNpcMgr->sTalentsSpec = "Beastmastery";
             EquipFullTemplateGear(player, sTemplateNpcMgr->sTalentsSpec);
             player->CLOSE_GOSSIP_MENU();
             break;
