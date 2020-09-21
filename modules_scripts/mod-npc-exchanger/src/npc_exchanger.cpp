@@ -17,7 +17,8 @@ class npc_exchanger : public CreatureScript
 public:
     npc_exchanger() : CreatureScript("npc_exchanger") {}
 
-bool GossipHello_npc_exchanger(Player* pPlayer, Creature* pCreature)
+
+bool OnGossipHello(Player* pPlayer, Creature* pCreature)
 {
     if (sWorld.GetModuleBoolConfig("NPC_Exchanger.Enable", true))
     {
@@ -36,7 +37,7 @@ bool GossipHello_npc_exchanger(Player* pPlayer, Creature* pCreature)
     }
 }
 
-void SendDefaultMenu_npc_exchanger(Player* pPlayer, Creature* pCreature, uint32 uiAction)
+void SendDefaultMenu(Player* pPlayer, Creature* pCreature, uint32 uiAction)
 {
     // Not allowed if in combat.
     if (pPlayer->IsInCombat())
@@ -231,11 +232,11 @@ void SendDefaultMenu_npc_exchanger(Player* pPlayer, Creature* pCreature, uint32 
 	}
 }
 
-bool GossipSelect_npc_exchanger(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
+bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
 {
     // Show menu
     if (uiSender == GOSSIP_SENDER_MAIN)
-        SendDefaultMenu_npc_exchanger(pPlayer, pCreature, uiAction);
+        SendDefaultMenu(pPlayer, pCreature, uiAction);
     return true;
 }
 };

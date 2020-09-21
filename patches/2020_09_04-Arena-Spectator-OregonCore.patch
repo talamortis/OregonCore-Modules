@@ -1,6 +1,6 @@
-From 0248883515fd183e11269992cfcc49fa79f67b7c Mon Sep 17 00:00:00 2001
+From fee9e406af316f26e79ad5759d16050a8df23844 Mon Sep 17 00:00:00 2001
 From: LordPsyan <lordpsyan@gmail.com>
-Date: Fri, 4 Sep 2020 09:33:25 +0000
+Date: Tue, 8 Sep 2020 05:20:50 +0000
 Subject: [PATCH] 2020_09_04-Arena-Spectator-OregonCore
 
 ---
@@ -712,7 +712,7 @@ index 00000000..ae2778fa
 +public:
 +    npc_arena_spectator() : CreatureScript("npc_arena_spectator") {}
 +
-+bool GossipHello_npc_arena_spectator(Player *pPlayer, Creature *pCreature)
++bool OnGossipHello(Player *pPlayer, Creature *pCreature)
 +{
 +	pPlayer->ADD_GOSSIP_ITEM(0, "Show List of Games above 1800 Rating", GOSSIP_SENDER_MAIN, 1000);
 +	pPlayer->ADD_GOSSIP_ITEM(0, "Show List of Games below 1800 Rating", GOSSIP_SENDER_MAIN, 2000);
@@ -817,7 +817,7 @@ index 00000000..ae2778fa
 +		pPlayer->ADD_GOSSIP_ITEM(0, "Next Page...", GOSSIP_SENDER_MAIN, 1000 + pages + 1);
 +}
 +
-+bool GossipSelect_npc_arena_spectator(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
++bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
 +{
 +	pPlayer->PlayerTalkClass->ClearMenus();
 +	if (uiAction >= 1000 && uiAction < 2000)
