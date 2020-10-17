@@ -307,7 +307,7 @@ void LoadNpcTele(void)
     };
 
 
-    QueryResult_AutoPtr result = WorldDatabase.PQuery(
+    QueryResult* result = WorldDatabase.PQuery(
         "SELECT `flag`, `data0`, `data1`, `cat_id`, C.`name` `namecat`, D.`name` `namedest`, "
         //      0        1        2        3                  4                   5
                "`pos_X`, `pos_Y`, `pos_Z`, `orientation`, `map`, `level`, `cost` "

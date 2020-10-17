@@ -24,7 +24,7 @@ bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
 	for (uint32 i = 1; i <= 12; i++)
 	{
-		QueryResult_AutoPtr type = WorldDatabase.PQuery("SELECT `text1`, `action` FROM `npc_exchanger` WHERE `type` = %u AND `active` = 1", i);
+		QueryResult* type = WorldDatabase.PQuery("SELECT `text1`, `action` FROM `npc_exchanger` WHERE `type` = %u AND `active` = 1", i);
 		if (type)
 		{
 			Field *fields = type->Fetch();
@@ -51,7 +51,7 @@ void SendDefaultMenu(Player* pPlayer, Creature* pCreature, uint32 uiAction)
     {
 	case 1001:
 		{
-		QueryResult_AutoPtr type1 = WorldDatabase.PQuery("SELECT `data1`, `data2`, `data3`, `text2` FROM `npc_exchanger` WHERE `type` = 1");
+		QueryResult* type1 = WorldDatabase.PQuery("SELECT `data1`, `data2`, `data3`, `text2` FROM `npc_exchanger` WHERE `type` = 1");
 		Field *fields1 = type1->Fetch();
 		if (pPlayer->GetHonorPoints() >= fields1[0].GetInt32())
 		{
@@ -66,7 +66,7 @@ void SendDefaultMenu(Player* pPlayer, Creature* pCreature, uint32 uiAction)
 		break;
 	case 1002:
 		{
-		QueryResult_AutoPtr type2 = WorldDatabase.PQuery("SELECT `data1`, `data2`, `data3`, `text2` FROM `npc_exchanger` WHERE `type` = 2");
+		QueryResult* type2 = WorldDatabase.PQuery("SELECT `data1`, `data2`, `data3`, `text2` FROM `npc_exchanger` WHERE `type` = 2");
 		Field *fields2 = type2->Fetch();
 		if (pPlayer->GetArenaPoints() >= fields2[0].GetInt32())
 		{
@@ -81,7 +81,7 @@ void SendDefaultMenu(Player* pPlayer, Creature* pCreature, uint32 uiAction)
 		break;
 	case 1003:
 		{
-		QueryResult_AutoPtr type3 = WorldDatabase.PQuery("SELECT `data1`, `data2`, `data3`, `text2` FROM `npc_exchanger` WHERE `type` = 3");
+		QueryResult* type3 = WorldDatabase.PQuery("SELECT `data1`, `data2`, `data3`, `text2` FROM `npc_exchanger` WHERE `type` = 3");
 		Field *fields3 = type3->Fetch();
 		if (pPlayer->GetHonorPoints() >= fields3[0].GetInt32())
 		{
@@ -96,7 +96,7 @@ void SendDefaultMenu(Player* pPlayer, Creature* pCreature, uint32 uiAction)
 		break;
 	case 1004:
 		{
-		QueryResult_AutoPtr type4 = WorldDatabase.PQuery("SELECT `data1`, `data2`, `data3`, `text2` FROM `npc_exchanger` WHERE `type` = 4");
+		QueryResult* type4 = WorldDatabase.PQuery("SELECT `data1`, `data2`, `data3`, `text2` FROM `npc_exchanger` WHERE `type` = 4");
 		Field *fields4 = type4->Fetch();
 		if (pPlayer->GetArenaPoints() >= fields4[0].GetInt32())
 		{
@@ -111,7 +111,7 @@ void SendDefaultMenu(Player* pPlayer, Creature* pCreature, uint32 uiAction)
 		break;
 	case 1005:
 		{
-		QueryResult_AutoPtr type5 = WorldDatabase.PQuery("SELECT `data1`, `data2`, `data3`, `text2` FROM `npc_exchanger` WHERE `type` = 5");
+		QueryResult* type5 = WorldDatabase.PQuery("SELECT `data1`, `data2`, `data3`, `text2` FROM `npc_exchanger` WHERE `type` = 5");
 		Field *fields5 = type5->Fetch();
 		if (pPlayer->HasItemCount(fields5[2].GetInt32(), fields5[0].GetInt32()))
 		{
@@ -126,7 +126,7 @@ void SendDefaultMenu(Player* pPlayer, Creature* pCreature, uint32 uiAction)
 		break;
 	case 1006:
 		{
-		QueryResult_AutoPtr type6 = WorldDatabase.PQuery("SELECT `data1`, `data2`, `data3`, `text2` FROM `npc_exchanger` WHERE `type` = 6");
+		QueryResult* type6 = WorldDatabase.PQuery("SELECT `data1`, `data2`, `data3`, `text2` FROM `npc_exchanger` WHERE `type` = 6");
 		Field *fields6 = type6->Fetch();
 		if (pPlayer->HasItemCount(fields6[2].GetInt32(), fields6[0].GetInt32()))
 		{
@@ -141,7 +141,7 @@ void SendDefaultMenu(Player* pPlayer, Creature* pCreature, uint32 uiAction)
 		break;
 	case 1007:
 		{
-		QueryResult_AutoPtr type7 = WorldDatabase.PQuery("SELECT `data1`, `data2`, `data3`, `text2` FROM `npc_exchanger` WHERE `type` = 7");
+		QueryResult* type7 = WorldDatabase.PQuery("SELECT `data1`, `data2`, `data3`, `text2` FROM `npc_exchanger` WHERE `type` = 7");
 		Field *fields7 = type7->Fetch();
 		if (pPlayer->GetMoney() >= fields7[0].GetInt32())
 		{
@@ -156,7 +156,7 @@ void SendDefaultMenu(Player* pPlayer, Creature* pCreature, uint32 uiAction)
 		break;
 	case 1008:
 		{
-		QueryResult_AutoPtr type8 = WorldDatabase.PQuery("SELECT `data1`, `data2`, `data3`, `text2` FROM `npc_exchanger` WHERE `type` = 8");
+		QueryResult* type8 = WorldDatabase.PQuery("SELECT `data1`, `data2`, `data3`, `text2` FROM `npc_exchanger` WHERE `type` = 8");
 		Field *fields8 = type8->Fetch();
 		if (pPlayer->HasItemCount(fields8[2].GetInt32(), fields8[0].GetInt32()))
 		{
@@ -171,7 +171,7 @@ void SendDefaultMenu(Player* pPlayer, Creature* pCreature, uint32 uiAction)
 		break;
 	case 1009:
 		{
-		QueryResult_AutoPtr type9 = WorldDatabase.PQuery("SELECT `data1`, `data2`, `data3`, `text2` FROM `npc_exchanger` WHERE `type` = 9");
+		QueryResult* type9 = WorldDatabase.PQuery("SELECT `data1`, `data2`, `data3`, `text2` FROM `npc_exchanger` WHERE `type` = 9");
 		Field *fields9 = type9->Fetch();
 		if (pPlayer->GetMoney() >= fields9[0].GetInt32())
 		{
@@ -186,7 +186,7 @@ void SendDefaultMenu(Player* pPlayer, Creature* pCreature, uint32 uiAction)
 		break;
 	case 1010:
 		{
-		QueryResult_AutoPtr type10 = WorldDatabase.PQuery("SELECT `data1`, `data2`, `data3`, `text2` FROM `npc_exchanger` WHERE `type` = 10");
+		QueryResult* type10 = WorldDatabase.PQuery("SELECT `data1`, `data2`, `data3`, `text2` FROM `npc_exchanger` WHERE `type` = 10");
 		Field *fields10 = type10->Fetch();
 		if (pPlayer->GetHonorPoints() >= fields10[0].GetInt32())
 		{
@@ -201,7 +201,7 @@ void SendDefaultMenu(Player* pPlayer, Creature* pCreature, uint32 uiAction)
 		break;
 	case 1011:
 		{
-		QueryResult_AutoPtr type11 = WorldDatabase.PQuery("SELECT `data1`, `data2`, `data3`, `text2` FROM `npc_exchanger` WHERE `type` = 11");
+		QueryResult* type11 = WorldDatabase.PQuery("SELECT `data1`, `data2`, `data3`, `text2` FROM `npc_exchanger` WHERE `type` = 11");
 		Field *fields11 = type11->Fetch();
 		if (pPlayer->GetMoney() >= fields11[0].GetInt32())
 		{
@@ -216,7 +216,7 @@ void SendDefaultMenu(Player* pPlayer, Creature* pCreature, uint32 uiAction)
 		break;
 	case 1012:
 		{
-		QueryResult_AutoPtr type12 = WorldDatabase.PQuery("SELECT `data1`, `data2`, `data3`, `text2` FROM `npc_exchanger` WHERE `type` = 12");
+		QueryResult* type12 = WorldDatabase.PQuery("SELECT `data1`, `data2`, `data3`, `text2` FROM `npc_exchanger` WHERE `type` = 12");
 		Field *fields12 = type12->Fetch();
 		if (pPlayer->GetArenaPoints() >= fields12[0].GetInt32())
 		{

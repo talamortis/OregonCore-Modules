@@ -63,7 +63,7 @@ bool getGuildHouseCoords(uint32 guildId, float &x, float &y, float &z, uint32 &m
  return false;
  }
 
- QueryResult_AutoPtr result;
+ QueryResult* result;
  result = WorldDatabase.PQuery("SELECT `x`, `y`, `z`, `map` FROM `guildhouses` WHERE `guildId` = %u", guildId);
  if (result)
  {
@@ -110,7 +110,7 @@ bool showBuyList(Player *player, Creature *_creature, uint32 showFromId = 0)
 {
  //show not occupied guildhouses
 
- QueryResult_AutoPtr result;
+ QueryResult* result;
  result = WorldDatabase.PQuery("SELECT `id`, `comment` FROM `guildhouses` WHERE `guildId` = 0 AND `id` > %u ORDER BY `id` ASC LIMIT %u",
  showFromId, GOSSIP_COUNT_MAX);
 
@@ -161,7 +161,7 @@ bool showBuyList(Player *player, Creature *_creature, uint32 showFromId = 0)
 
 bool isPlayerHasGuildhouse(Player *player, Creature *_creature, bool whisper = false)
 {
- QueryResult_AutoPtr result;
+ QueryResult* result;
  result = WorldDatabase.PQuery("SELECT `comment` FROM `guildhouses` WHERE `guildId` = %u",
  player->GetGuildId());
 
@@ -203,7 +203,7 @@ void buyGuildhouse(Player *player, Creature *_creature, uint32 guildhouseId)
  return;
  }
 
- QueryResult_AutoPtr result;
+ QueryResult* result;
 
  //check if somebody already occupied this GH
  result = WorldDatabase.PQuery("SELECT `id` FROM `guildhouses` WHERE `id` = %u AND `guildId` <> 0", guildhouseId);
@@ -230,7 +230,7 @@ void sellGuildhouse(Player *player, Creature *_creature)
 {
  if (isPlayerHasGuildhouse(player, _creature))
  {
- QueryResult_AutoPtr result;
+ QueryResult* result;
  result = WorldDatabase.PQuery("UPDATE `guildhouses` SET `guildId` = 0 WHERE `guildId` = %u",
  player->GetGuildId());
 
