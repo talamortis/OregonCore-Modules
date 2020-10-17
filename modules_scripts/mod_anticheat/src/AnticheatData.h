@@ -17,14 +17,11 @@ public:
     const MovementInfo& GetLastMovementInfo() const;
     void SetLastMovementInfo(MovementInfo& moveInfo);
 
+    const MovementInfo& GetLastStoredInfo() const;
+    void SetLastStoredInfo(MovementInfo& moveInfo);
+
     void SetPosition(float x, float y, float z, float o);
 
-    /*
-    bool GetDisableACCheck() const;
-    void SetDisableACCheck(bool check);
-
-    uint32 GetDisableACTimer() const;
-    void SetDisableACTimer(uint32 timer);*/
 
     uint32 GetTotalReports() const;
     void SetTotalReports(uint32 _totalReports);
@@ -46,12 +43,15 @@ public:
 
     void SetDailyReportState(bool b);
     bool GetDailyReportState();
+
+    const uint32 GetRefreshTime();
+    void SetRefreshTime(uint32 time);
 private:
     uint32 lastOpcode;
+    MovementInfo StoredMovementInfo;
     MovementInfo lastMovementInfo;
-    //bool disableACCheck;
-    //uint32 disableACCheckTimer;
     uint32 totalReports;
+    uint32 refreshTime;
     uint32 typeReports[MAX_REPORT_TYPES];
     float average;
     uint32 creationTime;

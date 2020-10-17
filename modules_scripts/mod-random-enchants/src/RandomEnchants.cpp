@@ -125,7 +125,7 @@ public:
 		else
 			tier = 5;
 		
-		QueryResult_AutoPtr qr = WorldDatabase.PQuery("SELECT enchantID FROM item_enchantment_random_tiers WHERE tier='%d' AND exclusiveSubClass=NULL AND class='%s' OR exclusiveSubClass='%u' OR class='ANY' ORDER BY RAND() LIMIT 1", tier, ClassQueryString.c_str(), sObjectMgr.GetItemTemplate(item->GetEntry())->SubClass);
+		QueryResult* qr = WorldDatabase.PQuery("SELECT enchantID FROM item_enchantment_random_tiers WHERE tier='%d' AND exclusiveSubClass=NULL AND class='%s' OR exclusiveSubClass='%u' OR class='ANY' ORDER BY RAND() LIMIT 1", tier, ClassQueryString.c_str(), sObjectMgr.GetItemTemplate(item->GetEntry())->SubClass);
 		return qr->Fetch()[0].GetUInt32();
 	}
 };

@@ -153,6 +153,9 @@ void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo,
 	if (player->IsGameMaster())
 		return;
 
+	if (player->GetSession()->GetLatency() > sWorld.GetModuleBoolConfig("AntiCheat.IgnoreLatency", 100))
+		return;
+
 	uint32 key = player->GetGUIDLow();
 
 	if (player->IsInFlight() || player->GetTransport())
@@ -168,6 +171,9 @@ void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo,
 	JumpHackDetection(player, movementInfo, opcode);
 	TeleportPlaneHackDetection(player, movementInfo);
 	ClimbHackDetection(player, movementInfo, opcode);
+
+	if (location == 0)
+		m_Players[key].SetLastStoredInfo(movementInfo);
 
 	m_Players[key].SetLastMovementInfo(movementInfo);
 	m_Players[key].SetLastOpcode(opcode);
@@ -215,14 +221,17 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
 
 	uint32 key = player->GetGUIDLow();
 
+	if (player->IsFalling() || player->IsBeingTeleported())
+		return;
+
 	// We also must check the map because the movementFlag can be modified by the client.
 	// If we just check the flag, they could always add that flag and always skip the speed hacking detection.
 	// 369 == DEEPRUN TRAM
 	if (m_Players[key].GetLastMovementInfo().HasMovementFlag(MOVEMENTFLAG_ONTRANSPORT) && player->GetMapId() == 369)
 		return;
 
-	uint32 distance2D = (uint32)movementInfo.pos.GetExactDist2d(&m_Players[key].GetLastMovementInfo().pos);
-	uint8 moveType = 0;
+	float distance2D = (float)movementInfo.pos.GetExactDist2d(&m_Players[key].GetLastMovementInfo().pos);
+	UnitMoveType moveType;
 
 	// we need to know HOW is the player moving
 	// TO-DO: Should we check the incoming movement flags?
@@ -245,16 +254,13 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
 		timeDiff = 1;
 
 	// this is the distance doable by the player in 1 sec, using the time done to move to this point.
-	uint32 clientSpeedRate = distance2D * 1000 / timeDiff;
+	float clientSpeedRate = distance2D * 1000 / timeDiff;
 
 	// we did the (uint32) cast to accept a margin of tolerance
 	if (clientSpeedRate > speedRate)
 	{
 		if (sWorld.GetModuleBoolConfig("Anticheat.WriteLog", false))
 			sLog.outString("AnticheatMgr:: Speed-Hack detected player %s (%u)", player->GetName(), player->GetGUIDLow());
-
-		if (sWorld.GetModuleBoolConfig("Anticheat.KickPlayer.SpeedHack", true))
-			player->GetSession()->KickPlayer();
 
 		BuildReport(player, SPEED_HACK_REPORT);
 	}
@@ -267,7 +273,7 @@ void AnticheatMgr::HandlePlayerLogin(Player* player)
 	CharacterDatabase.PExecute("DELETE FROM players_reports_status WHERE guid=%u", player->GetGUIDLow());
 	// we initialize the pos of lastMovementPosition var.
 	m_Players[player->GetGUIDLow()].SetPosition(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation());
-	QueryResult_AutoPtr resultDB = CharacterDatabase.PQuery("SELECT * FROM daily_players_reports WHERE guid=%u;", player->GetGUIDLow());
+	QueryResult* resultDB = CharacterDatabase.PQuery("SELECT * FROM daily_players_reports WHERE guid=%u;", player->GetGUIDLow());
 
 	if (resultDB)
 		m_Players[player->GetGUIDLow()].SetDailyReportState(true);
@@ -365,7 +371,7 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
 		}
 	}
 
-	if (m_Players[key].GetTotalReports() > (uint32)sWorld.GetModuleIntConfig("Anticheat.ReportsForIngameWarnings", 70))
+	/*if (m_Players[key].GetTotalReports() > (uint32)sWorld.GetModuleIntConfig("Anticheat.ReportsForIngameWarnings", 70))
 	{
 		// display warning at the center of the screen, hacky way?
 		std::string str = "";
@@ -373,7 +379,7 @@ void AnticheatMgr::BuildReport(Player* player, uint8 reportType)
 		WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
 		data << str;
 		sWorld.SendGlobalGMMessage(&data);
-	}
+	}*/
 }
 
 void AnticheatMgr::AnticheatGlobalCommand(ChatHandler* handler)
@@ -381,7 +387,7 @@ void AnticheatMgr::AnticheatGlobalCommand(ChatHandler* handler)
 	// MySQL will sort all for us, anyway this is not the best way we must only save the anticheat data not whole player's data!.
 	ObjectAccessor::Instance().SaveAllPlayers();
 
-	QueryResult_AutoPtr resultDB = CharacterDatabase.Query("SELECT guid,average,total_reports FROM players_reports_status WHERE total_reports != 0 ORDER BY average ASC LIMIT 3;");
+	QueryResult* resultDB = CharacterDatabase.Query("SELECT guid,average,total_reports FROM players_reports_status WHERE total_reports != 0 ORDER BY average ASC LIMIT 3;");
 	if (!resultDB)
 	{
 		handler->PSendSysMessage("No players found.");

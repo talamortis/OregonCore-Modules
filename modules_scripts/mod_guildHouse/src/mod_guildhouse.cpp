@@ -6,7 +6,7 @@
 
 bool GuildHouse::SelectGuildHouse(Guild* guild, Player* player, Creature* creature)
 {
-    QueryResult_AutoPtr result = CharacterDatabase.PQuery("SELECT `id`, `guild` FROM guild_house WHERE `guild` = %u", player->GetGuildId());
+    QueryResult* result = CharacterDatabase.PQuery("SELECT `id`, `guild` FROM guild_house WHERE `guild` = %u", player->GetGuildId());
 
     if (result)
     {
@@ -25,7 +25,7 @@ bool GuildHouse::SelectGuildHouse(Guild* guild, Player* player, Creature* creatu
 bool GuildHouse::SellGuildHouse(Player* player, Guild* guild)
 {
 
-    QueryResult_AutoPtr result = CharacterDatabase.PQuery("SELECT id, `guild` FROM `guild_house` WHERE guild = %u", player->GetGuildId());
+    QueryResult* result = CharacterDatabase.PQuery("SELECT id, `guild` FROM `guild_house` WHERE guild = %u", player->GetGuildId());
 
     if (!result)
     {
@@ -78,7 +78,7 @@ void GuildHouse::TeleportToGuildHouse(Guild* guild, Player* player, Creature* cr
         return;
     }
 
-    QueryResult_AutoPtr result = CharacterDatabase.PQuery("SELECT `id`, `guild`, `phase`, `map`,`positionX`, `positionY`, `positionZ` FROM guild_house WHERE `guild` = %u", player->GetGuildId());
+    QueryResult* result = CharacterDatabase.PQuery("SELECT `id`, `guild`, `phase`, `map`,`positionX`, `positionY`, `positionZ` FROM guild_house WHERE `guild` = %u", player->GetGuildId());
 
     if (!result)
     {
@@ -92,7 +92,7 @@ void GuildHouse::TeleportToGuildHouse(Guild* guild, Player* player, Creature* cr
 
 void GuildHouse::SpawnNPC(uint32 entry, Player* player, uint32 cost)
 {
-    QueryResult_AutoPtr result = CharacterDatabase.PQuery("SELECT `id`, `guild`, `phase`, `map`,`positionX`, `positionY`, `positionZ`, `zoneId` FROM guild_house WHERE `guild` = %u", player->GetGuildId());;
+    QueryResult* result = CharacterDatabase.PQuery("SELECT `id`, `guild`, `phase`, `map`,`positionX`, `positionY`, `positionZ`, `zoneId` FROM guild_house WHERE `guild` = %u", player->GetGuildId());;
 
     if (!result)
         return;
@@ -145,7 +145,7 @@ void GuildHouse::SpawnNPC(uint32 entry, Player* player, uint32 cost)
 
 void GuildHouse::SpawnObject(uint32 entry, Player* player, uint32 cost)
 {
-    QueryResult_AutoPtr result = CharacterDatabase.PQuery("SELECT `id`, `guild`, `phase`, `map`,`positionX`, `positionY`, `positionZ`, `zoneId` FROM guild_house WHERE `guild` = %u", player->GetGuildId());;
+    QueryResult* result = CharacterDatabase.PQuery("SELECT `id`, `guild`, `phase`, `map`,`positionX`, `positionY`, `positionZ`, `zoneId` FROM guild_house WHERE `guild` = %u", player->GetGuildId());;
 
     if (!result)
         return;
@@ -223,7 +223,7 @@ void GuildHouse::DeleteCreature(Player* player)
     if (!unit)
         return;
 
-    QueryResult_AutoPtr result = CharacterDatabase.PQuery("SELECT `id`, `guild`, `phase`, `map`,`positionX`, `positionY`, `positionZ`, `zoneId` FROM guild_house WHERE `guild` = %u", player->GetGuildId());;
+    QueryResult* result = CharacterDatabase.PQuery("SELECT `id`, `guild`, `phase`, `map`,`positionX`, `positionY`, `positionZ`, `zoneId` FROM guild_house WHERE `guild` = %u", player->GetGuildId());;
 
     if (!result)
         return;
@@ -366,7 +366,7 @@ bool GuildHouse::OnListNearObjects(Player* player, Item* item)
     float distance =  10.0f;
     uint32 count = 0;
 
-    QueryResult_AutoPtr result = WorldDatabase.PQuery("SELECT guid, id, position_x, position_y, position_z, map, "
+    QueryResult* result = WorldDatabase.PQuery("SELECT guid, id, position_x, position_y, position_z, map, "
         "(POW(position_x - '%f', 2) + POW(position_y - '%f', 2) + POW(position_z - '%f', 2)) AS order_ "
         "FROM gameobject WHERE phaseMask='%u' AND map='%u'  AND (POW(position_x - '%f', 2) + POW(position_y - '%f', 2) + POW(position_z - '%f', 2)) <= '%f' ORDER BY order_",
         player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetGuildId(),

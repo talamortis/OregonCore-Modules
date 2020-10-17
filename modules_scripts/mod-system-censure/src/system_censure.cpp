@@ -74,7 +74,7 @@ public:
     {
         sLog.outString("Loading Chat Censure...");
 
-        QueryResult_AutoPtr result = CharacterDatabase.PQuery("SELECT `id`,`text` FROM chat_censure");
+        QueryResult* result = CharacterDatabase.PQuery("SELECT `id`,`text` FROM chat_censure");
 
         if (!result)
         {
@@ -131,7 +131,7 @@ public:
             return false;
 
         chat.clear();
-        QueryResult_AutoPtr result = CharacterDatabase.PQuery("SELECT `id`,`text` FROM chat_censure");
+        QueryResult* result = CharacterDatabase.PQuery("SELECT `id`,`text` FROM chat_censure");
         uint32 count = 0;
         uint32 oldMSTime = getMSTime();
 
@@ -168,7 +168,7 @@ public:
         std::string text = textExtracted;
 
         //lets check the Database to see if arguement already exist
-        QueryResult_AutoPtr result = CharacterDatabase.PQuery("SELECT `text` FROM `chat_censure` WHERE `text` = '%s'", text.c_str());
+        QueryResult* result = CharacterDatabase.PQuery("SELECT `text` FROM `chat_censure` WHERE `text` = '%s'", text.c_str());
 
         if (result)
         {
@@ -200,7 +200,7 @@ public:
 
         std::string text = textExtracted;
 
-        QueryResult_AutoPtr result = CharacterDatabase.PQuery("SELECT `text` FROM `chat_censure` WHERE `text` = '%s'", text.c_str());
+        QueryResult* result = CharacterDatabase.PQuery("SELECT `text` FROM `chat_censure` WHERE `text` = '%s'", text.c_str());
 
         if (!result)
         {

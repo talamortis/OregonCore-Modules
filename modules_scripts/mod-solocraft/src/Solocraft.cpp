@@ -9,6 +9,21 @@
 #include "InstanceData.h"
 #include "Chat.h"
 
+// Set the instance difficulty
+int CalculateDifficulty(Map* map, Player* /*player*/) {
+    int difficulty = 1;
+    if (map)
+    {
+        if (map->IsRaid())
+            difficulty = sWorld.GetModuleIntConfig("Solocraft.Raid", 1);
+        else if (map->IsHeroic())
+            difficulty = sWorld.GetModuleIntConfig("Solocraft.Heroic", 1);
+        else if (map->IsDungeon())
+            difficulty = sWorld.GetModuleIntConfig("Solocraft.Dungeon", 1);
+    }
+    return difficulty;
+}
+
 class SolocraftAnnounce : public PlayerScript
 {
 public:
@@ -28,6 +43,30 @@ public:
     }
 };
 
+class solocraft_uint_script : public UnitScript
+{
+public:
+    solocraft_uint_script() : UnitScript("solocraft_uint_script") {}
+
+    void OnDealDamage(Unit* unit, uint32& damage)
+    {
+        if (sWorld.GetModuleBoolConfig("Solocraft.Enable", true))
+        {
+            Player* plr = unit->ToPlayer();
+
+            if (plr)
+            {
+                Group* grp = plr->GetGroup();
+
+                if (grp)
+                    return;
+
+                damage *= CalculateDifficulty(plr->GetMap(), plr);
+            }
+        }
+    }
+};
+
 class solocraft_player_instance_handler : public PlayerScript {
 
 public:
@@ -37,6 +76,11 @@ public:
     void OnMapChanged(Player *player) override {
         if (sWorld.GetModuleBoolConfig("Solocraft.Enable", true))
         {
+            Group* grp = player->GetGroup();
+
+            if (grp)
+                return;
+
             Map *map = player->GetMap();
             int difficulty = CalculateDifficulty(map, player);
             int numInGroup = GetNumInGroup(player);
@@ -47,21 +91,6 @@ public:
 private:
 
 	std::map<uint32, int> _unitDifficulty;
-
-    // Set the instance difficulty
-    int CalculateDifficulty(Map* map, Player* /*player*/) {
-        int difficulty = 1;
-        if (map)
-        {
-            if (map->IsRaid())
-                difficulty = sWorld.GetModuleIntConfig("Solocraft.Raid", 1);
-            else if (map->IsHeroic())
-                difficulty = sWorld.GetModuleIntConfig("Solocraft.Heroic", 1);
-            else if (map->IsDungeon())
-                difficulty = sWorld.GetModuleIntConfig("Solocraft.Dungeon", 1);
-        }
-        return difficulty;
-    }
 
     // Get the groups size
     int GetNumInGroup(Player* player) {
@@ -97,8 +126,14 @@ private:
                 player->HandleStatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_PCT, float(difficulty * 100), true);
             }
 
-            // Set player health
+            // Set player health & pet
             player->SetFullHealth();
+            Pet* pet = player->GetPet();
+
+            if (pet)
+                pet->SetFullHealth();
+
+
             if (player->getPowerType() == POWER_MANA)
             {
                 // Buff the player's health
@@ -131,6 +166,7 @@ private:
 
 void AddSolocraftScripts()
 {
+    new solocraft_uint_script();
     new SolocraftAnnounce();
     new solocraft_player_instance_handler();
 }

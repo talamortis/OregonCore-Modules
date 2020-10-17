@@ -77,6 +77,7 @@ class AnticheatMgr
         float GetAverage(uint32 lowGUID);
         uint32 GetTypeReports(uint32 lowGUID, uint8 type);
 
+        float location = 0.0f;
         void AnticheatGlobalCommand(ChatHandler* handler);
         void AnticheatDeleteCommand(uint32 guid);
 

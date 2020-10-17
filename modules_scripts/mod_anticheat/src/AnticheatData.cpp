@@ -37,14 +37,19 @@ void AnticheatData::SetLastOpcode(uint32 opcode)
 void AnticheatData::SetPosition(float x, float y, float z, float o)
 {
     lastMovementInfo.pos = { x, y, z, o };
-
-
-
 }
 
 uint32 AnticheatData::GetLastOpcode() const
 {
     return lastOpcode;
+}
+
+const uint32 AnticheatData::GetRefreshTime() {
+    return refreshTime;
+}
+
+void AnticheatData::SetRefreshTime(uint32 time) {
+    refreshTime = time;
 }
 
 const MovementInfo& AnticheatData::GetLastMovementInfo() const
@@ -55,6 +60,16 @@ const MovementInfo& AnticheatData::GetLastMovementInfo() const
 void AnticheatData::SetLastMovementInfo(MovementInfo& moveInfo)
 {
     lastMovementInfo = moveInfo;
+}
+
+const MovementInfo& AnticheatData::GetLastStoredInfo() const
+{
+    return StoredMovementInfo;
+}
+
+void AnticheatData::SetLastStoredInfo(MovementInfo& moveInfo)
+{
+    StoredMovementInfo = moveInfo;
 }
 
 uint32 AnticheatData::GetTotalReports() const

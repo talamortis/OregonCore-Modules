@@ -1,8 +1,10 @@
 #include "AnticheatMgr.h"
 #include "Object.h"
 #include "AccountMgr.h"
+#include "AnticheatData.h"
 
 int64 resetTime = 0;
+int32 UpdateMovement = 0;
 int64 lastIterationPlayer = sWorld.GetUptime() + 30;//TODO: change 30 secs static to a configurable option
 class AnticheatPlayerScript : public PlayerScript
 {
@@ -34,7 +36,7 @@ class AnticheatMovementHandlerScript : public MovementHandlerScript
 	}
 	void OnPlayerMove(Player* player, MovementInfo mi, uint32 opcode) override
 	{
-		sAnticheatMgr->StartHackDetection(player, mi, opcode);
+		sAnticheatMgr->StartHackDetection(player, mi, opcode); 
 	}
 };
 void startAnticheatScripts()
