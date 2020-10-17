@@ -94,12 +94,18 @@ public:
     void OnMapChanged(Player *player) override {
         if (sWorld.GetModuleBoolConfig("Solocraft.Enable", true))
         {
+            Map* map = player->GetMap();
+            if (!player->IsAlive())
+            {
+                player->ResurrectPlayer(0.7f);
+            }
+                
+
             Group* grp = player->GetGroup();
 
             if (grp)
                 return;
 
-            Map *map = player->GetMap();
             int difficulty = CalculateDifficulty(map, player);
             int numInGroup = GetNumInGroup(player);
             ApplyBuffs(player, map, difficulty, numInGroup);
