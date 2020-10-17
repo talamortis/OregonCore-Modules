@@ -48,6 +48,24 @@ class solocraft_uint_script : public UnitScript
 public:
     solocraft_uint_script() : UnitScript("solocraft_uint_script") {}
 
+    void OnHeal(Unit* unit, Unit* reciever, uint32& gain)
+    {
+        if (sWorld.GetModuleBoolConfig("Solocraft.Enable", true))
+        {
+            Player* plr = unit->ToPlayer();
+
+            if (plr)
+            {
+                Group* grp = plr->GetGroup();
+
+                if (grp)
+                    return;
+
+                gain *= CalculateDifficulty(plr->GetMap(), plr);
+            }
+        }
+    }
+
     void OnDealDamage(Unit* unit, uint32& damage)
     {
         if (sWorld.GetModuleBoolConfig("Solocraft.Enable", true))
