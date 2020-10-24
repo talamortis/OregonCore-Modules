@@ -13,7 +13,6 @@ Set xp per level range e.g in dynamicxp_config.sql
 *   Dynamic.XP.Rate.40-49 = 5
 *   Dynamic.XP.Rate.50-59 = 6
 *   Dynamic.XP.Rate.60-69 = 7
-*   Dynamic.XP.Rate.70-79 = 8
 
 
 ## Credits
