@@ -4,10 +4,12 @@ Script reworked by Micrah/Milestorme and Poszer (Poszer is the Best)
 Module Created by Micrah/Milestorme
 Original Script from AshmaneCore https://github.com/conan513 Single Player Project 
 */
-#include "Configuration/Config.h"
-#include "ScriptMgr.h"
+#include "SystemConfig.h"
+#include "ScriptPCH.h"
 #include "Player.h"
 #include "Chat.h"
+#include "World.h"
+#include "Common.h"
 
 
 class spp_dynamic_xp_rate : public PlayerScript
@@ -19,7 +21,7 @@ class spp_dynamic_xp_rate : public PlayerScript
        {
             if (sWorld.GetModuleBoolConfig("Dynamic.XP.Rate.Announce", true))
                {
-               ChatHandler(player->GetSession()).SendSysMessage("This server is running the |cff4CFF00Level Dynamic XP |rmodule.");
+               ChatHandler(player->GetSession()).SendSysMessage("This server is running the |cff4CFF00Level Dynamic XP |rmodule by |cff4CFF00Milestorme.");
                }
        }
         void OnGiveXP(Player* player, uint32& amount, Unit* /*victim*/) override
