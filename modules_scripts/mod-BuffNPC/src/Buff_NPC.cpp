@@ -444,7 +444,7 @@ public:
     void OnLogin(Player* player, bool firstlogin)
     {
         // Announce Module
-        if (sWorld.GetModuleBoolConfig("Npc_Buff.EnableSmallBuff", true) && sWorld.GetModuleBoolConfig("BuffNPC.Announce", true))
+        if (sWorld.GetModuleBoolConfig("BuffNPC.Announce", true))
         {
             ChatHandler(player->GetSession()).SendSysMessage("This server is running the |cff4CFF00BuffNPC |rmodule by |cff4CFF00LordPsyan");
         }
