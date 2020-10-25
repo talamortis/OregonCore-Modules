@@ -1,4 +1,5 @@
 INSERT INTO `module_config` (`config`, `value`, `comment`) VALUES
+    ('BuffNPC.Announce', 1, NULL),
     ('Npc_Buff.OnlyGMs', 0, NULL),
     ('Npc_Buff.EnableSmallBuff', 1, NULL),
     ('Npc_Buff.EnableGreatBuff', 1, NULL),
