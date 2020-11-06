@@ -2,8 +2,6 @@
 
 This is a module that adds Premium account features to players.
 
-![script screenshot](/screenshots/script.png?raw=true "script screenshot")
-
 Current features:
 
 This module allows players to:
