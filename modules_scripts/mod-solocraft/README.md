@@ -1,7 +1,4 @@
-# ![logo](https://raw.githubusercontent.com/azerothcore/azerothcore.github.io/master/images/logo-github.png) AzerothCore
 # mod-solocraft
-- Latest build status with azerothcore: [![Build Status](https://travis-ci.org/azerothcore/mod-solocraft.svg?branch=master)](https://travis-ci.org/azerothcore/mod-solocraft)
-
 
 ## Description
 
@@ -10,7 +7,7 @@
 
 ## How to use ingame
 
-1. Enable in conf
+1. Enable in world.module_conf
 2. Enter Dungeon or Raid
 
 ## Requirements
@@ -21,20 +18,10 @@
 ## Installation
 
 ```
-1) Simply place the module under the `modules` directory of your AzerothCore source. 
-2) Re-run cmake and launch a clean build of AzerothCore.
+1) Simply place the module under the `modules` directory of your Oregoncore source. 
+2) Re-run cmake and launch a clean build of Oregoncore.
 ```
 
-## Edit module configuration (optional)
-
-If you need to change the module configuration, go to your server configuration folder (where your `worldserver` or `worldserver.exe` is), copy `emblem_transfer.conf.dist` to `emblem_transfer.conf` and edit that new file.
-
-### Data ###
-------------------------------------------------------------------------------------------------------------------
-- Type: Server/Player
-- Script: Solocraft
-- Config: No
-- SQL: Yes
 
 ### Credits ###
 ------------------------------------------------------------------------------------------------------------------
@@ -46,7 +33,6 @@ If you need to change the module configuration, go to your server configuration 
 - [AC-Web](http://ac-web.org/)
 - [ModCraft.io](http://modcraft.io/)
 - [OwnedCore](http://ownedcore.com/)
-- [OregonCore](https://wiki.oregon-core.net/)
-- [Wowhead.com](http://wowhead.com)
-- [AoWoW](https://wotlk.evowow.com/)
-- AzerothCore: [repository](https://github.com/azerothcore) - [website](http://azerothcore.org/) - [discord chat community](https://discord.gg/PaqQRkd)
+- [OregonCore](https://github.com/talamortis/)
+
+
