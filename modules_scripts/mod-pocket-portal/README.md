@@ -23,29 +23,29 @@ To add the module follow the next steps:
 
 ## Database Setup
 The sql files are located in mod-pocket-portal/sql and mod-TeleNPC2/sql
-They will be imported into your database automatically, assuming you have
-DatabaseUpdater.Enabled = 1
-set in your oregoncore.conf file.
+They will be imported into your database automatically, assuming you have.
+* DatabaseUpdater.Enabled = 1
+* set in your oregoncore.conf file.
 
-To do it manually, just run all the sql files located in <source_of_oregoncore>/modules/mod-pocket-portal/sql and mod-TeleNPC2/sql.
+### To do it manually, just run all the sql files located in <source_of_oregoncore>/modules/mod-pocket-portal/sql and mod-TeleNPC2/sql.
 
 ## Server Config Setup
 ### On Windows
-Modify the dabatase table world.mod_config.
-there are 4 entries:
-	* PocketPortal.Enable = 1 
-	* Portal.NpcDuration = 60(seconds) 
-        * TeleNPC.Enable = 1 
-        * TeleNPC.Announce = 1 
+Modify the dabatase table world.mod_config
+there are 4 entries.
+* PocketPortal.Enable = 1 
+* Portal.NpcDuration = 60(seconds) 
+* TeleNPC.Enable = 1 
+* TeleNPC.Announce = 1 
 
 
 ### On Linux
-Modify the dabatase table world.mod_config .
-there are 4 entries:
-	* PocketPortal.Enable = 1 
-	* Portal.NpcDuration = 60(seconds) 
-        * TeleNPC.Enable = 1 
-        * TeleNPC.Announce = 1 
+Modify the dabatase table world.mod_config
+there are 4 entries.
+* PocketPortal.Enable = 1 
+* Portal.NpcDuration = 60(seconds) 
+* TeleNPC.Enable = 1 
+* TeleNPC.Announce = 1 
 
 ## Start the server and enjoy
 Done, you are ready to use Pocket Portal... Go online, .add item (entry 90044 by default) and try it out!
