@@ -18,8 +18,8 @@ enum Vendors
     NPC_VENDOR_HH    = 25039,
     NPC_AUCTION_H   = 9856,
     NPC_AUCTION_A   = 8670,
-	NPC_INNKEEPER_H = 19571,
-	NPC_INNKEEPER_A = 19571
+    NPC_INNKEEPER_H = 19571,
+    NPC_INNKEEPER_A = 19571
 };
 
 enum Trainers
@@ -80,7 +80,9 @@ public:
 
 
         float rangeCheck = 10.0f;
-        if (player->FindNearestCreature(NPC_AUCTION_A, rangeCheck) ||
+        if (player->FindNearestCreature(NPC_INNKEEPER_A, rangeCheck) ||
+	    player->FindNearestCreature(NPC_INNKEEPER_H, rangeCheck) ||
+	    player->FindNearestCreature(NPC_AUCTION_A, rangeCheck) ||
             player->FindNearestCreature(NPC_AUCTION_H, rangeCheck) ||
             player->FindNearestCreature(NPC_VENDOR_A, rangeCheck) ||
             player->FindNearestCreature(NPC_VENDOR_H, rangeCheck) ||
