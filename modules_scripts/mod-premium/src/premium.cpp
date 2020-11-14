@@ -8,15 +8,18 @@
 #include "BattlegroundMgr.h"
 #include "Battleground.h"
 #include "Map.h"
+#include "World.h"
 
 enum Vendors
 {
-    NPC_VENDOR_A    = 55002,
-    NPC_VENDOR_H    = 55002,
+    NPC_VENDOR_A    = 100000,
+    NPC_VENDOR_H    = 100000,
     NPC_VENDOR_AA    = 25039,
     NPC_VENDOR_HH    = 25039,
     NPC_AUCTION_H   = 9856,
-    NPC_AUCTION_A   = 8670
+    NPC_AUCTION_A   = 8670,
+    NPC_INNKEEPER_H = 19571,
+    NPC_INNKEEPER_A = 19571
 };
 
 enum Trainers
@@ -38,7 +41,7 @@ enum Trainers
     MAGE_H      = 5883,
     PALADIN_H   = 23128,
     PRIEST_H    = 3045,
-    ROGUE_H     = 3401,
+    ROGUE_H     = 26329,
     SHAMAN_H    = 3344,
     WARLOCK_H   = 3324,
     WARRIOR_H   = 3354, 
@@ -77,7 +80,9 @@ public:
 
 
         float rangeCheck = 10.0f;
-        if (player->FindNearestCreature(NPC_AUCTION_A, rangeCheck) ||
+        if (player->FindNearestCreature(NPC_INNKEEPER_A, rangeCheck) ||
+	    player->FindNearestCreature(NPC_INNKEEPER_H, rangeCheck) ||
+	    player->FindNearestCreature(NPC_AUCTION_A, rangeCheck) ||
             player->FindNearestCreature(NPC_AUCTION_H, rangeCheck) ||
             player->FindNearestCreature(NPC_VENDOR_A, rangeCheck) ||
             player->FindNearestCreature(NPC_VENDOR_H, rangeCheck) ||
@@ -150,12 +155,27 @@ public:
                 player->GetSession()->SendShowBank(player->GetGUID());
                 break;
             }
-			/*     case GOSSIP_ACTION_INFO_DEF + 4: Mail Box
+			     case GOSSIP_ACTION_INFO_DEF + 4: /*Hearthstone*/
             {
-                player->GetSession()->SendShowMailBox(player->GetGUID());
-                break;
-          }   
-       /*     case GOSSIP_ACTION_INFO_DEF + 5: poszer
+					 uint32 vendorId = 0;
+					 std::string salute;
+					 if (player->GetTeamId() == TEAM_ALLIANCE)
+					 {
+						 vendorId = NPC_INNKEEPER_A;
+						 salute = "Greetings";
+					 }
+					 else {
+						 vendorId = NPC_INNKEEPER_H;
+						 salute = "Zug zug";
+					 }
+
+					 SummonTempNPC(player, vendorId, salute.c_str());
+					 player->CLOSE_GOSSIP_MENU();
+					 break;
+			   // player->SetBindPoint(pCreature->GetGUID());
+               // break;
+            } 
+            case GOSSIP_ACTION_INFO_DEF + 5: /*pocket portal*/
             {
                 uint32 vendorId = 0;
                 std::string salute;
@@ -171,7 +191,7 @@ public:
                 SummonTempNPC(player, vendorId, salute.c_str());
                 player->CLOSE_GOSSIP_MENU();
                 break;
-            } */
+            } 
             case GOSSIP_ACTION_INFO_DEF + 6: /*Mount*/
             {
                 player->CLOSE_GOSSIP_MENU();
@@ -254,11 +274,11 @@ public:
             {
                 player->PlayerTalkClass->ClearMenus();
 
-               // if (sWorld.GetModuleBoolConfig("Services", true))
-                //    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Poszer", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
+                if (sWorld.GetModuleBoolConfig("Pocket.Portal", true))
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Pocket Portal", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
 
-               // if (sWorld.GetModuleBoolConfig("MailBox", true))
-               //     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Mail Box", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
+                if (sWorld.GetModuleBoolConfig("Hearthstone", true))
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Inn Keeper", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
 
                 if (sWorld.GetModuleBoolConfig("Bank", true))
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Show Bank", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
@@ -340,7 +360,7 @@ public:
         Creature* npc = player->SummonCreature(entry, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, npcDuration);
         npc->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         npc->GetMotionMaster()->MoveFollow(player, PET_FOLLOW_DIST, player->GetFollowAngle());
-      //  npc->setFaction(player->getFaction());
+        npc->SetFaction(player->GetFaction());
 
 	//	if (salute && !(salute[0] == '\0'))
      //       npc->MonsterWhisper(salute, player, false);
