@@ -34,7 +34,11 @@ public:
        if (player->duel || player->GetMap()->IsBattleArena() || player->InBattleground() || player->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH) || player->isDead()|| player->IsInCombat() || player->IsInFlight() || player->HasStealthAura() || player->HasInvisibilityAura())
            return false;
 
-
+        float rangeCheck = 10.0f;
+        if (player->FindNearestCreature(NPC_VENDOR_A, rangeCheck) ||
+            player->FindNearestCreature(NPC_VENDOR_H, rangeCheck))
+            return false;
+	    
         player->PlayerTalkClass->ClearMenus();
 
         if (sWorld.GetModuleBoolConfig("PocketPortal.Enable", true))
