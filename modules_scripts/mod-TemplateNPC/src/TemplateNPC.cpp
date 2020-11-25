@@ -72,7 +72,7 @@ void sTemplateNPC::LoadAllianceGearContainer()
 
     m_AllianceGearContainer.clear();
 
-    QueryResult* result = CharacterDatabase.PQuery("SELECT playerClass, playerSpec, pos, itemEntry, enchant, socket1, socket2, socket3, bonusEnchant, prismaticEnchant FROM template_npc_alliance;");
+    QueryResult_AutoPtr result = CharacterDatabase.PQuery("SELECT playerClass, playerSpec, pos, itemEntry, enchant, socket1, socket2, socket3, bonusEnchant, prismaticEnchant FROM template_npc_alliance;");
 
     uint32 oldMSTime = getMSTime();
     uint32 count = 0;
@@ -113,7 +113,7 @@ void sTemplateNPC::LoadHordeGearContainer()
 
     m_HordeGearContainer.clear();
 
-    QueryResult* result = CharacterDatabase.PQuery("SELECT playerClass, playerSpec, pos, itemEntry, enchant, socket1, socket2, socket3, bonusEnchant, prismaticEnchant FROM template_npc_horde;");
+    QueryResult_AutoPtr result = CharacterDatabase.PQuery("SELECT playerClass, playerSpec, pos, itemEntry, enchant, socket1, socket2, socket3, bonusEnchant, prismaticEnchant FROM template_npc_horde;");
 
     uint32 oldMSTime = getMSTime();
     uint32 count = 0;
@@ -196,7 +196,7 @@ bool sTemplateNPC::CanEquipTemplate(Player* player, std::string& playerSpecStr)
 {
     if (player->GetTeam() == ALLIANCE/* && player->getRace() != RACE_HUMAN*/)
     {
-        QueryResult* result = CharacterDatabase.PQuery("SELECT playerClass, playerSpec FROM template_npc_alliance "
+        QueryResult_AutoPtr result = CharacterDatabase.PQuery("SELECT playerClass, playerSpec FROM template_npc_alliance "
             "WHERE playerClass = '%s' AND playerSpec = '%s';", GetClassString(player).c_str(), playerSpecStr.c_str());
 
         if (!result)
@@ -204,7 +204,7 @@ bool sTemplateNPC::CanEquipTemplate(Player* player, std::string& playerSpecStr)
     }
     else if (player->GetTeam() == HORDE)
     {
-        QueryResult* result = CharacterDatabase.PQuery("SELECT playerClass, playerSpec FROM template_npc_horde "
+        QueryResult_AutoPtr result = CharacterDatabase.PQuery("SELECT playerClass, playerSpec FROM template_npc_horde "
             "WHERE playerClass = '%s' AND playerSpec = '%s';", GetClassString(player).c_str(), playerSpecStr.c_str());
 
         if (!result)

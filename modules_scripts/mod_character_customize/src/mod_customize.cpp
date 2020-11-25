@@ -11,7 +11,7 @@ public:
     {
         for (uint32 i = 1; i <= 3; i++)
         {
-            QueryResult* type = WorldDatabase.PQuery("SELECT `text`, `action` FROM `npc_customer` WHERE `type` = %u AND `active` = 1", i);
+            QueryResult_AutoPtr type = WorldDatabase.PQuery("SELECT `text`, `action` FROM `npc_customer` WHERE `type` = %u AND `active` = 1", i);
             if (type)
             {
                 Field *fields = type->Fetch();
@@ -210,7 +210,7 @@ public:
         {
         case 1001:
         {
-            QueryResult* type1 = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 1");
+            QueryResult_AutoPtr type1 = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 1");
             Field *fields1 = type1->Fetch();
             uint32 gold = fields1[0].GetUInt32();
             uint32 honor = fields1[1].GetUInt32();
@@ -340,7 +340,7 @@ public:
         break;
         case 1002:
         {
-            QueryResult* type2 = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 2");
+            QueryResult_AutoPtr type2 = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 2");
             Field *fields2 = type2->Fetch();
             uint32 gold = fields2[0].GetUInt32();
             uint32 honor = fields2[1].GetUInt32();
@@ -436,7 +436,7 @@ public:
         break;
         case 1003:
         {
-            QueryResult* type3 = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 3");
+            QueryResult_AutoPtr type3 = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 3");
             Field *fields3 = type3->Fetch();
             uint32 gold = fields3[0].GetUInt32();
             uint32 honor = fields3[1].GetUInt32();
@@ -479,7 +479,7 @@ public:
         break;
         case 1501: // Gender
         {
-            QueryResult* cost = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 3");
+            QueryResult_AutoPtr cost = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 3");
             Field *costfields = cost->Fetch();
             pPlayer->ModifyMoney((-1)*costfields[0].GetUInt32());
             pPlayer->ModifyHonorPoints((-1)*costfields[1].GetUInt32());
@@ -518,7 +518,7 @@ public:
         break;
         case 1502: // Skin color
         {
-            QueryResult* cost = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 3");
+            QueryResult_AutoPtr cost = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 3");
             Field *costfields = cost->Fetch();
             pPlayer->ModifyMoney((-1)*costfields[0].GetUInt32());
             pPlayer->ModifyHonorPoints((-1)*costfields[1].GetUInt32());
@@ -534,7 +534,7 @@ public:
         break;
         case 1503: // Face
         {
-            QueryResult* cost = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 3");
+            QueryResult_AutoPtr cost = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 3");
             Field *costfields = cost->Fetch();
             pPlayer->ModifyMoney((-1)*costfields[0].GetUInt32());
             pPlayer->ModifyHonorPoints((-1)*costfields[1].GetUInt32());
@@ -550,7 +550,7 @@ public:
         break;
         case 1504: // Hair style
         {
-            QueryResult* cost = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 3");
+            QueryResult_AutoPtr cost = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 3");
             Field *costfields = cost->Fetch();
             pPlayer->ModifyMoney((-1)*costfields[0].GetUInt32());
             pPlayer->ModifyHonorPoints((-1)*costfields[1].GetUInt32());
@@ -566,7 +566,7 @@ public:
         break;
         case 1505: // Hair color
         {
-            QueryResult* cost = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 3");
+            QueryResult_AutoPtr cost = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 3");
             Field *costfields = cost->Fetch();
             pPlayer->ModifyMoney((-1)*costfields[0].GetUInt32());
             pPlayer->ModifyHonorPoints((-1)*costfields[1].GetUInt32());
@@ -582,7 +582,7 @@ public:
         break;
         case 1506: // Accessuares
         {
-            QueryResult* cost = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 3");
+            QueryResult_AutoPtr cost = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 3");
             Field *costfields = cost->Fetch();
             pPlayer->ModifyMoney((-1)*costfields[0].GetUInt32());
             pPlayer->ModifyHonorPoints((-1)*costfields[1].GetUInt32());
@@ -704,7 +704,7 @@ public:
         break;
         case 2001:
         {
-            QueryResult* type1 = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 1");
+            QueryResult_AutoPtr type1 = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 1");
             Field *fields1 = type1->Fetch();
             pPlayer->ModifyMoney((-1)*fields1[0].GetUInt32());
             pPlayer->ModifyHonorPoints((-1)*fields1[1].GetUInt32());
@@ -718,7 +718,7 @@ public:
         break;
         case 2002:
         {
-            QueryResult* type1 = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 1");
+            QueryResult_AutoPtr type1 = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 1");
             Field *fields1 = type1->Fetch();
             pPlayer->ModifyMoney((-1)*fields1[0].GetUInt32());
             pPlayer->ModifyHonorPoints((-1)*fields1[1].GetUInt32());
@@ -731,7 +731,7 @@ public:
         break;
         case 2003:
         {
-            QueryResult* type1 = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 1");
+            QueryResult_AutoPtr type1 = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 1");
             Field *fields1 = type1->Fetch();
             pPlayer->ModifyMoney((-1)*fields1[0].GetUInt32());
             pPlayer->ModifyHonorPoints((-1)*fields1[1].GetUInt32());
@@ -745,7 +745,7 @@ public:
         break;
         case 2004:
         {
-            QueryResult* type1 = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 1");
+            QueryResult_AutoPtr type1 = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 1");
             Field *fields1 = type1->Fetch();
             pPlayer->ModifyMoney((-1)*fields1[0].GetUInt32());
             pPlayer->ModifyHonorPoints((-1)*fields1[1].GetUInt32());
@@ -759,7 +759,7 @@ public:
         break;
         case 2005:
         {
-            QueryResult* type1 = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 1");
+            QueryResult_AutoPtr type1 = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 1");
             Field *fields1 = type1->Fetch();
             pPlayer->ModifyMoney((-1)*fields1[0].GetUInt32());
             pPlayer->ModifyHonorPoints((-1)*fields1[1].GetUInt32());
@@ -773,7 +773,7 @@ public:
         break;
         case 2006:
         {
-            QueryResult* type1 = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 1");
+            QueryResult_AutoPtr type1 = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 1");
             Field *fields1 = type1->Fetch();
             pPlayer->ModifyMoney((-1)*fields1[0].GetUInt32());
             pPlayer->ModifyHonorPoints((-1)*fields1[1].GetUInt32());
@@ -787,7 +787,7 @@ public:
         break;
         case 2007:
         {
-            QueryResult* type1 = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 1");
+            QueryResult_AutoPtr type1 = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 1");
             Field *fields1 = type1->Fetch();
             pPlayer->ModifyMoney((-1)*fields1[0].GetUInt32());
             pPlayer->ModifyHonorPoints((-1)*fields1[1].GetUInt32());
@@ -801,7 +801,7 @@ public:
         break;
         case 2008:
         {
-            QueryResult* type1 = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 1");
+            QueryResult_AutoPtr type1 = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 1");
             Field *fields1 = type1->Fetch();
             pPlayer->ModifyMoney((-1)*fields1[0].GetUInt32());
             pPlayer->ModifyHonorPoints((-1)*fields1[1].GetUInt32());
@@ -815,7 +815,7 @@ public:
         break;
         case 2009:
         {
-            QueryResult* type1 = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 1");
+            QueryResult_AutoPtr type1 = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 1");
             Field *fields1 = type1->Fetch();
             pPlayer->ModifyMoney((-1)*fields1[0].GetUInt32());
             pPlayer->ModifyHonorPoints((-1)*fields1[1].GetUInt32());
@@ -829,7 +829,7 @@ public:
         break;
         case 2010:
         {
-            QueryResult* type1 = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 1");
+            QueryResult_AutoPtr type1 = WorldDatabase.PQuery("SELECT `cost_gold`, `cost_honor`, `cost_ap`, `cost_itemid`, `constitemcount` FROM `npc_customer` WHERE `type` = 1");
             Field *fields1 = type1->Fetch();
             pPlayer->ModifyMoney((-1)*fields1[0].GetUInt32());
             pPlayer->ModifyHonorPoints((-1)*fields1[1].GetUInt32());

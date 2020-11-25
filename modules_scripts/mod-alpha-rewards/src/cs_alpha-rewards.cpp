@@ -57,14 +57,14 @@ public:
             {
                 std::string str = args;
                 str[0] = toupper(str[0]);
-                QueryResult* GetAccountId = CharacterDatabase.PQuery("SELECT `account` FROM `characters` WHERE `name` = '%s'", str.c_str());
+                QueryResult_AutoPtr GetAccountId = CharacterDatabase.PQuery("SELECT `account` FROM `characters` WHERE `name` = '%s'", str.c_str());
 
                 if (GetAccountId)
                 {
                     Field* field2 = GetAccountId->Fetch();
                     uint32 AccountID = field2[0].GetInt32();
 
-                    QueryResult* result = LoginDatabase.PQuery("SELECT `game_point` FROM `account` WHERE `id` = '%u'", AccountID);
+                    QueryResult_AutoPtr result = LoginDatabase.PQuery("SELECT `game_point` FROM `account` WHERE `id` = '%u'", AccountID);
                     Field* fields = result->Fetch();
 
                     if (result)

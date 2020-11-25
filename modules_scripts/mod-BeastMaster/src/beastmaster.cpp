@@ -102,7 +102,7 @@ return true;
 
 bool showNormalPet(Player *player, Creature *m_creature, uint32 showFromId = 0)
 {
- QueryResult* result;
+ QueryResult_AutoPtr result;
  result = WorldDatabase.PQuery("SELECT `entry`, `name` FROM `beastmaster` WHERE `cat_number` = 0 ORDER BY `entry` ASC");
 
  if (result)
@@ -147,7 +147,7 @@ bool showNormalPet(Player *player, Creature *m_creature, uint32 showFromId = 0)
 
 bool showPetSpells(Player *player, Creature *m_creature, uint32 showFromId = 0)
 {
- QueryResult* result;
+ QueryResult_AutoPtr result;
  result = WorldDatabase.PQuery("SELECT `entry`, `name` FROM `beastmaster` WHERE `cat_number` = 2 ORDER BY `entry` ASC");
 
  if (result)
@@ -204,7 +204,7 @@ if (player->IsInCombat())
     bool EnableNormalPet = sWorld.GetModuleBoolConfig("BeastMaster.EnableNormalPet", true);
 
   // send name as gossip item
-       QueryResult* result;
+       QueryResult_AutoPtr result;
         uint32 spellId = 0;
         uint32 catNumber = 0;
         uint32 cost = 0;

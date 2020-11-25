@@ -16,7 +16,7 @@ void AlphaRewards::OnLoginCheck(Player* player)
     if (!sWorld.GetModuleBoolConfig("Alpha.Rewards.Enable", true))
         return;
 
-    QueryResult* result = LoginDatabase.PQuery("SELECT `game_point` FROM `account` WHERE `id` = '%u' ", player->GetSession()->GetAccountId());
+    QueryResult_AutoPtr result = LoginDatabase.PQuery("SELECT `game_point` FROM `account` WHERE `id` = '%u' ", player->GetSession()->GetAccountId());
 
     if (!result)
         return;
@@ -50,7 +50,7 @@ void AlphaRewards::LoadAlphaRewardsTable()
 
     sLog.outString("Loading Alpha Reward System...");
 
-    QueryResult* result = WorldDatabase.PQuery("SELECT `Entry`, `TypeId`, `Points` FROM `alpha_reward_system`");
+    QueryResult_AutoPtr result = WorldDatabase.PQuery("SELECT `Entry`, `TypeId`, `Points` FROM `alpha_reward_system`");
 
     if (!result)
     {
@@ -91,7 +91,7 @@ void AlphaRewards::LoadAlphaRewardItemTable()
 
     sLog.outString("Loading Alpha Rewards Item Table...");
 
-    QueryResult* result = WorldDatabase.PQuery("SELECT `id`, `itemId`, `points`, `quantity` FROM `alpha_reward_system_items`");
+    QueryResult_AutoPtr result = WorldDatabase.PQuery("SELECT `id`, `itemId`, `points`, `quantity` FROM `alpha_reward_system_items`");
 
     if (!result)
     {
@@ -166,7 +166,7 @@ void AlphaRewards::AddItemAndCheck(Player* player, uint32 item, uint32 quantity,
 
 void AlphaRewards::UpdateDBGamePoint(ChatHandler* handler, char const* account, uint32 point)
 {
-    QueryResult* result = LoginDatabase.PQuery("SELECT `id`, `username` FROM `account` WHERE `username` = '%s'", account);
+    QueryResult_AutoPtr result = LoginDatabase.PQuery("SELECT `id`, `username` FROM `account` WHERE `username` = '%s'", account);
 
     if (!result)
     {
