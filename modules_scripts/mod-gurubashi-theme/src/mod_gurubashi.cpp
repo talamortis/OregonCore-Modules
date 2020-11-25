@@ -9,7 +9,7 @@
 
 int GetLastThemeTime()
 {
-    QueryResult* result;
+    QueryResult_AutoPtr result;
       result = WorldDatabase.PQuery("SELECT `time` FROM `gurubashi_lastspawned`");
 
       if (result)
@@ -26,7 +26,7 @@ void GossipObjects(Player *player, Creature *m_creature)
 {
    if (GetLastThemeTime() + AVAILABLEAFTER <= time (NULL))
     {
-       QueryResult* result;
+       QueryResult_AutoPtr result;
           result = WorldDatabase.PQuery("SELECT `id`, `name` FROM `gurubashi_themes`");
         if (result)
         {
@@ -67,7 +67,7 @@ class Theme_NPC : public CreatureScript
         {
             if (action > OFFSET_THEME)
             {
-                QueryResult* result;
+                QueryResult_AutoPtr result;
                 result = WorldDatabase.PQuery("DELETE FROM `gurubashi_lastspawned`");
                 result = WorldDatabase.PQuery("INSERT INTO `gurubashi_lastspawned` VALUES (%u)", time (NULL));
                 result = WorldDatabase.PQuery("SELECT `x`, `y`, `z`, `o`, `entry` FROM `gurubashi_spawns` WHERE `theme` = %u", action - OFFSET_THEME);

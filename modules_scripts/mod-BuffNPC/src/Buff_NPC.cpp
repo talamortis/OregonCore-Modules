@@ -103,7 +103,7 @@ bool showSmallBuff(Player *pPlayer, Creature *pCreature, uint32 showFromId = 0)
 {
  
 
- QueryResult* result;
+ QueryResult_AutoPtr result;
  result = WorldDatabase.PQuery("SELECT `name`, `cat_number` FROM `npc_buff_spells` WHERE `cat_number` < 2000 ORDER BY `cat_number` ASC");
 
  if (result)
@@ -146,7 +146,7 @@ bool showGreatBuff(Player *pPlayer, Creature *pCreature, uint32 showFromId = 0)
 {
  
 
- QueryResult* result;
+ QueryResult_AutoPtr result;
  result = WorldDatabase.PQuery("SELECT `name`, `cat_number` FROM `npc_buff_spells` WHERE `cat_number` < 3000 AND `cat_number` > 2000 ORDER BY `cat_number` ASC");
 
  if (result)
@@ -189,7 +189,7 @@ bool showGmBuff(Player *pPlayer, Creature *pCreature, uint32 showFromId = 0)
 {
  
 
- QueryResult* result;
+ QueryResult_AutoPtr result;
  result = WorldDatabase.PQuery("SELECT `name`, `cat_number` FROM `npc_buff_spells` WHERE `cat_number` < 4000 AND `cat_number` > 3000 ORDER BY `cat_number` ASC");
 
  if (result)
@@ -232,7 +232,7 @@ bool showPlayerTools(Player *pPlayer, Creature *pCreature, uint32 showFromId = 0
 {
  
 
- QueryResult* result;
+ QueryResult_AutoPtr result;
  result = WorldDatabase.PQuery("SELECT `name`, `cat_number` FROM `npc_buff_spells` WHERE `cat_number` < 5000 AND `cat_number` > 4000 ORDER BY `cat_number` ASC");
 
  if (result)
@@ -302,7 +302,7 @@ if (pPlayer->GetMoney() < (sConfig.GetFloatDefault("BuffGoldCost",0)))
   // send name as gossip item
 
 
-       QueryResult* result;
+       QueryResult_AutoPtr result;
         uint32 spellId = 0;
         uint32 catNumber = 0;
         uint32 goldCost = 0;

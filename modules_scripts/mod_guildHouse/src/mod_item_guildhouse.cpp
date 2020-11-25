@@ -155,7 +155,7 @@ public:
     void OnGossipSelectCode(Player* player, Item* item, uint32 sender, uint32 action, const char* code) override
     {
 
-        QueryResult* result = CharacterDatabase.PQuery("SELECT `id`, `guild`, `phase`, `map`,`positionX`, `positionY`, `positionZ`, `zoneId` FROM guild_house WHERE `guild` = %u", player->GetGuildId());;
+        QueryResult_AutoPtr result = CharacterDatabase.PQuery("SELECT `id`, `guild`, `phase`, `map`,`positionX`, `positionY`, `positionZ`, `zoneId` FROM guild_house WHERE `guild` = %u", player->GetGuildId());;
 
         if (!result)
             return;
@@ -242,7 +242,7 @@ public:
 
     void OnDisband(Guild* guild)
     {
-        QueryResult* result = CharacterDatabase.PQuery("SELECT `id`, `map` FROM guild_house WHERE `guild` = %u", guild->GetId());
+        QueryResult_AutoPtr result = CharacterDatabase.PQuery("SELECT `id`, `map` FROM guild_house WHERE `guild` = %u", guild->GetId());
 
         if (!result)
             return;

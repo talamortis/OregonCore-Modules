@@ -273,7 +273,7 @@ void AnticheatMgr::HandlePlayerLogin(Player* player)
 	CharacterDatabase.PExecute("DELETE FROM players_reports_status WHERE guid=%u", player->GetGUIDLow());
 	// we initialize the pos of lastMovementPosition var.
 	m_Players[player->GetGUIDLow()].SetPosition(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation());
-	QueryResult* resultDB = CharacterDatabase.PQuery("SELECT * FROM daily_players_reports WHERE guid=%u;", player->GetGUIDLow());
+	QueryResult_AutoPtr resultDB = CharacterDatabase.PQuery("SELECT * FROM daily_players_reports WHERE guid=%u;", player->GetGUIDLow());
 
 	if (resultDB)
 		m_Players[player->GetGUIDLow()].SetDailyReportState(true);
@@ -387,7 +387,7 @@ void AnticheatMgr::AnticheatGlobalCommand(ChatHandler* handler)
 	// MySQL will sort all for us, anyway this is not the best way we must only save the anticheat data not whole player's data!.
 	ObjectAccessor::Instance().SaveAllPlayers();
 
-	QueryResult* resultDB = CharacterDatabase.Query("SELECT guid,average,total_reports FROM players_reports_status WHERE total_reports != 0 ORDER BY average ASC LIMIT 3;");
+	QueryResult_AutoPtr resultDB = CharacterDatabase.Query("SELECT guid,average,total_reports FROM players_reports_status WHERE total_reports != 0 ORDER BY average ASC LIMIT 3;");
 	if (!resultDB)
 	{
 		handler->PSendSysMessage("No players found.");
