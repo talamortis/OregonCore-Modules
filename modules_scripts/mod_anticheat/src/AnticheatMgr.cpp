@@ -158,12 +158,10 @@ void AnticheatMgr::StartHackDetection(Player* player, MovementInfo movementInfo,
 
 	uint32 key = player->GetGUIDLow();
 
-	if (player->IsInFlight() || player->GetTransport())
-	{
-		m_Players[key].SetLastMovementInfo(movementInfo);
-		m_Players[key].SetLastOpcode(opcode);
-		return;
-	}
+	//m_Players[key].SetLastMovementInfo(movementInfo);
+	//m_Players[key].SetLastOpcode(opcode);
+
+
 
 	SpeedHackDetection(player, movementInfo);
 	FlyHackDetection(player, movementInfo);
@@ -248,19 +246,30 @@ void AnticheatMgr::SpeedHackDetection(Player* player, MovementInfo movementInfo)
 	uint32 speedRate = (uint32)(player->GetSpeed(UnitMoveType(moveType)) + movementInfo.j_xyspeed);
 
 	// how long the player took to move to here.
-	uint32 timeDiff = getMSTimeDiff(m_Players[key].GetLastMovementInfo().time, movementInfo.time);
+	uint32 timeDiff = getMSTimeDiff(m_Players[key].GetLastMovementInfo().time, movementInfo.time) / 1.5;
 
 	if (!timeDiff)
 		timeDiff = 1;
 
 	// this is the distance doable by the player in 1 sec, using the time done to move to this point.
-	float clientSpeedRate = distance2D * 1000 / timeDiff;
+	uint32 clientSpeedRate = distance2D * 100 / timeDiff;
 
 	// we did the (uint32) cast to accept a margin of tolerance
 	if (clientSpeedRate > speedRate)
 	{
-		if (sWorld.GetModuleBoolConfig("Anticheat.WriteLog", false))
-			sLog.outString("AnticheatMgr:: Speed-Hack detected player %s (%u)", player->GetName(), player->GetGUIDLow());
+		//if (sWorld.GetModuleBoolConfig("Anticheat.WriteLog", false))
+		//	sLog.outString("AnticheatMgr:: Speed-Hack detected player %s (%u)", player->GetName(), player->GetGUIDLow());
+
+		if (player->IsFalling() || player->IsBeingTeleported())
+			return;
+		Position* pos;
+
+		float x = m_Players[key].GetLastMovementInfo().GetPos()->GetPositionX();
+		float y = m_Players[key].GetLastMovementInfo().GetPos()->GetPositionY();
+		float z = m_Players[key].GetLastMovementInfo().GetPos()->GetPositionZ();
+		float o = m_Players[key].GetLastMovementInfo().GetPos()->GetOrientation();
+		
+		player->TeleportTo(player->GetMapId(), x, y, z, o);
 
 		BuildReport(player, SPEED_HACK_REPORT);
 	}
@@ -273,7 +282,7 @@ void AnticheatMgr::HandlePlayerLogin(Player* player)
 	CharacterDatabase.PExecute("DELETE FROM players_reports_status WHERE guid=%u", player->GetGUIDLow());
 	// we initialize the pos of lastMovementPosition var.
 	m_Players[player->GetGUIDLow()].SetPosition(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation());
-	QueryResult* resultDB = CharacterDatabase.PQuery("SELECT * FROM daily_players_reports WHERE guid=%u;", player->GetGUIDLow());
+	QueryResult_AutoPtr resultDB = CharacterDatabase.PQuery("SELECT * FROM daily_players_reports WHERE guid=%u;", player->GetGUIDLow());
 
 	if (resultDB)
 		m_Players[player->GetGUIDLow()].SetDailyReportState(true);
@@ -387,7 +396,7 @@ void AnticheatMgr::AnticheatGlobalCommand(ChatHandler* handler)
 	// MySQL will sort all for us, anyway this is not the best way we must only save the anticheat data not whole player's data!.
 	ObjectAccessor::Instance().SaveAllPlayers();
 
-	QueryResult* resultDB = CharacterDatabase.Query("SELECT guid,average,total_reports FROM players_reports_status WHERE total_reports != 0 ORDER BY average ASC LIMIT 3;");
+	QueryResult_AutoPtr resultDB = CharacterDatabase.Query("SELECT guid,average,total_reports FROM players_reports_status WHERE total_reports != 0 ORDER BY average ASC LIMIT 3;");
 	if (!resultDB)
 	{
 		handler->PSendSysMessage("No players found.");
