@@ -106,7 +106,7 @@ public:
             BattlePassPlayerInfo* playerBattlePassInfo = player->CustomData.GetDefault<BattlePassPlayerInfo>("BattlePassPlayerInfo");
             playerBattlePassInfo->battlepassLevel = fields[1].GetUInt32();
             playerBattlePassInfo->Quest_Complted = fields[2].GetUInt32();
-            playerBattlePassInfo->pvpKills = fields[2].GetUInt32();
+            playerBattlePassInfo->pvpKills = fields[3].GetUInt32();
 
             
         } while (result->NextRow());
