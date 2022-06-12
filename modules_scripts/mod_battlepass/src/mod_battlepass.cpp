@@ -42,34 +42,37 @@ void BattlePassInfo::BattlePassLevelUp(Player* player)
     player->CastSpell(player, 24312, false);
     player->RemoveAurasDueToSpell(24312);
 
-    auto it = mRewards.find(playerBattlePassInfo->battlepassLevel);
-
-    if (it == mRewards.end())
-        return;
-
-    ItemTemplate const* itemProto = sItemStorage.LookupEntry<ItemTemplate>(it->second.reward);
-
-    switch (it->second.option)
+    for (auto it = mRewards.begin(); it != mRewards.end(); ++it)
     {
-    case 1: // Item
-        sBattlePass->PlayerAddItem(player, it->second.reward, it->second.amount);
-        ChatHandler(player).PSendSysMessage(" %s has been sent to your ingame mailbox", itemProto->Name1);
-        break;
-    case 2: // Gold
-        player->ModifyMoney(it->second.reward);
-        ChatHandler(player).PSendSysMessage("%u has been added to your character", it->second.reward);
-        break;
-    case 3: //levels
-        if (player->getLevel() == sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
+        if (playerBattlePassInfo->battlepassLevel != it->second.id)
+            continue;
+
+        switch (it->second.option)
         {
-            ChatHandler(player).PSendSysMessage("You are already Max level, Unable to give this tier reward");
-            return;
+        case 1:
+        {
+            ItemTemplate const* itemProto = sItemStorage.LookupEntry<ItemTemplate>(it->second.reward);
+            sBattlePass->PlayerAddItem(player, it->second.reward, it->second.amount);
+            ChatHandler(player).PSendSysMessage(" %s x %u has been sent to your ingame mailbox", itemProto->Name1, it->second.amount);
+            continue;
         }
-        player->SetLevel(player->getLevel() + it->second.reward);
-        ChatHandler(player).PSendSysMessage("You have been awarded %1 for tiering up!", it->second.reward);
-        break;
-    default:
-        return;
+        case 2: // Gold
+            player->ModifyMoney(it->second.reward);
+            ChatHandler(player).PSendSysMessage("%u has been added to your character", it->second.reward);
+            break;
+        case 3: //levels
+            if (player->getLevel() == sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
+            {
+                ChatHandler(player).PSendSysMessage("You are already Max level, Unable to give this tier reward");
+                return;
+            }
+            player->SetLevel(player->getLevel() + it->second.reward);
+            ChatHandler(player).PSendSysMessage("You have been awarded %1 for tiering up!", it->second.reward);
+            break;
+        default:
+            break;
+        }
+
     }
 }
 
@@ -130,7 +133,7 @@ public:
 
         playerBattlePassInfo->Quest_Complted++;
 
-        if (playerBattlePassInfo->Quest_Complted == sWorld.GetModuleIntConfig("BattlePassLevelQuest", 10))
+        if (playerBattlePassInfo->Quest_Complted == sWorld.GetModuleIntConfig("BattlePassLevelQuest", 1))
         {
             sBattlePass->BattlePassLevelUp(player);
             playerBattlePassInfo->Quest_Complted = 0;
@@ -203,7 +206,7 @@ public:
             rmap.reward = fields[2].GetUInt32();
             rmap.amount = fields[3].GetUInt32();
 
-            sBattlePass->mRewards[rmap.id] = rmap;
+            sBattlePass->mRewards.insert(std::make_pair(rmap.id, rmap));
 
             ++count;
         } while (result->NextRow());

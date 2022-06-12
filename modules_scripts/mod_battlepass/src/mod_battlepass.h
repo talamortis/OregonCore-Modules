@@ -34,7 +34,7 @@ public:
     void Erase(Player* player);
     void PlayerAddItem(Player* player, uint32 item, uint32 amount);
     std::vector<uint32>pGUID;
-    UNORDERED_MAP<uint32, mRewardsMap> mRewards;
+    std::unordered_multimap<uint32, mRewardsMap> mRewards;
 
 };
 
