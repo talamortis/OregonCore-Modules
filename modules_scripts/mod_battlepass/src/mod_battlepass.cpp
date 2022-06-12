@@ -39,7 +39,8 @@ void BattlePassInfo::BattlePassLevelUp(Player* player)
     playerBattlePassInfo->battlepassLevel++;
 
     ChatHandler(player).PSendSysMessage("|cff4CFF00Congratulations your new BattlePass Level is|cffFF0000 %u", playerBattlePassInfo->battlepassLevel);
-    player->CastSpell(player, 11540, false);
+    player->CastSpell(player, 24312, false);
+    player->RemoveAurasDueToSpell(24312);
 
     auto it = mRewards.find(playerBattlePassInfo->battlepassLevel);
 
@@ -59,6 +60,11 @@ void BattlePassInfo::BattlePassLevelUp(Player* player)
         ChatHandler(player).PSendSysMessage("%u has been added to your character", it->second.reward);
         break;
     case 3: //levels
+        if (player->getLevel() == sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
+        {
+            ChatHandler(player).PSendSysMessage("You are already Max level, Unable to give this tier reward");
+            return;
+        }
         player->SetLevel(player->getLevel() + it->second.reward);
         ChatHandler(player).PSendSysMessage("You have been awarded %1 for tiering up!", it->second.reward);
         break;
@@ -124,13 +130,11 @@ public:
 
         playerBattlePassInfo->Quest_Complted++;
 
-        if (playerBattlePassInfo->Quest_Complted == sWorld.GetModuleIntConfig("BattlePassLevelQuest", 1))
+        if (playerBattlePassInfo->Quest_Complted == sWorld.GetModuleIntConfig("BattlePassLevelQuest", 10))
         {
             sBattlePass->BattlePassLevelUp(player);
             playerBattlePassInfo->Quest_Complted = 0;
         }
-
-
     }
 
     void OnPVPKill(Player* killer, Player* killed)
@@ -148,7 +152,7 @@ public:
         BattlePassPlayerInfo* playerBattlePassInfo = killer->CustomData.GetDefault<BattlePassPlayerInfo>("BattlePassPlayerInfo");
         playerBattlePassInfo->pvpKills++;
 
-        if (playerBattlePassInfo->pvpKills == sWorld.GetModuleIntConfig("BattlePassLevelPvP", 20))
+        if (playerBattlePassInfo->pvpKills == sWorld.GetModuleIntConfig("BattlePassLevelPvP", 30))
         {
             sBattlePass->BattlePassLevelUp(killer);
             playerBattlePassInfo->pvpKills = 0;
@@ -194,7 +198,6 @@ public:
         {
             Field* fields = result->Fetch();
             mRewardsMap rmap;
-            //sBattlePass->mRewards.emplace(fields[0].GetUInt32(), fields[1].GetUInt32());
             rmap.id = fields[0].GetUInt32();
             rmap.option = fields[1].GetUInt32();
             rmap.reward = fields[2].GetUInt32();
@@ -210,8 +213,36 @@ public:
     }
 };
 
+class BattlePassItem : public ItemScript
+{
+public:
+    BattlePassItem() : ItemScript("BattlePassItem") {}
+
+    bool OnUse(Player* player, Item* item, SpellCastTargets const& /*targets*/) override
+    {
+        if (sBattlePass->DoesHaveBattlePass(player))
+        {
+            ChatHandler(player).PSendSysMessage("This Character already has battlepass");
+            return false;
+        }
+        uint32 pGUID = player->GetGUID();
+
+        if (pGUID)
+            return false;
+
+        // Now we have executed into the DB
+        CharacterDatabase.PQuery("INSERT INTO `battlepass_player` (playerGUID) VALUES (%u);", pGUID);
+        // We need to put in the Map
+        sBattlePass->pGUID.push_back(pGUID);
+        // Now we have activated this item we need to remove it
+        player->DestroyItemCount(item->GetEntry(), 1, true);
+        return true;
+    }
+};
+
 void Addmod_battlepassScripts()
 {
     new LoadRewardsTable();
     new mod_BattlePass_Player();
+    new BattlePassItem();
 }

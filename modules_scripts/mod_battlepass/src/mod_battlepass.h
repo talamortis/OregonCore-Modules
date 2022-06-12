@@ -1,5 +1,5 @@
-#ifndef ISPREMIUM_H
-#define ISPREMIUM_H
+#ifndef BATTLEPASS
+#define BATTLEPASS_H
 
 #include "ScriptMgr.h"
 #include "Language.h"
