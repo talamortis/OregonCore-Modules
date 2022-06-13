@@ -133,7 +133,7 @@ public:
 
         playerBattlePassInfo->Quest_Complted++;
 
-        if (playerBattlePassInfo->Quest_Complted == sWorld.GetModuleIntConfig("BattlePassLevelQuest", 1))
+        if (playerBattlePassInfo->Quest_Complted == sWorld.GetModuleIntConfig("BattlePassLevelQuest", 10))
         {
             sBattlePass->BattlePassLevelUp(player);
             playerBattlePassInfo->Quest_Complted = 0;
@@ -240,6 +240,11 @@ public:
         sBattlePass->pGUID.push_back(pGUID);
         // Now we have activated this item we need to remove it
         player->DestroyItemCount(item->GetEntry(), 1, true);
+
+        BattlePassPlayerInfo* playerBattlePassInfo = player->CustomData.GetDefault<BattlePassPlayerInfo>("BattlePassPlayerInfo");
+        playerBattlePassInfo->battlepassLevel = 0;
+        playerBattlePassInfo->pvpKills = 0;
+        playerBattlePassInfo->Quest_Complted = 0;
         return true;
     }
 };
