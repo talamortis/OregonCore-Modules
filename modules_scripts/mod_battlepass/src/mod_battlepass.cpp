@@ -230,11 +230,12 @@ public:
         }
         uint32 pGUID = player->GetGUID();
 
-        if (pGUID)
+        if (!pGUID)
             return false;
 
         // Now we have executed into the DB
         CharacterDatabase.PQuery("INSERT INTO `battlepass_player` (playerGUID) VALUES (%u);", pGUID);
+        ChatHandler(player).PSendSysMessage("You now are enrolled onto the battlepass");
         // We need to put in the Map
         sBattlePass->pGUID.push_back(pGUID);
         // Now we have activated this item we need to remove it
