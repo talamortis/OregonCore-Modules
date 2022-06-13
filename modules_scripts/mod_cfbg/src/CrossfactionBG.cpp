@@ -102,6 +102,24 @@ public:
         sCrossFaction.SetFakeValues(player);
     }
 
+    void OnLogin(Player* player, bool firstLogin)
+    {
+
+        // Check see if CFBG is enabled.
+        if (!sWorld.GetModuleBoolConfig("CROSSFACTION_BG_ENABLE", true))
+            return;
+
+        // If we are not in a battle ground we should reset the player data on login;
+        if (!player->GetMap()->IsBattleground())
+        {
+            CFBGDPlayerInfo* CFBGplayerInfo = player->CustomData.GetDefault<CFBGDPlayerInfo>("CFBGDPlayerInfo");
+            player->SetByteValue(UNIT_FIELD_BYTES_0, 0, CFBGplayerInfo->getORace());
+            player->SetFaction(CFBGplayerInfo->getOFaction());
+            sCrossFaction.ReplaceRacials(player, true);
+            player->InitDisplayIds();
+            sWorld.InvalidatePlayerDataToAllClient(player->GetGUID());
+        }
+    }
 
     void OnLogout(Player* player)
     {
