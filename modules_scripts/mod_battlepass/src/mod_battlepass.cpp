@@ -11,10 +11,18 @@
 class BattlePassPlayerInfo : public DataMap::Base
 {
 public:
-    BattlePassPlayerInfo() {}
+    BattlePassPlayerInfo() { reset(); }
     uint32 Quest_Complted;
     uint32 pvpKills;
     uint32 battlepassLevel;
+
+    uint32 timer = sWorld.GetModuleIntConfig("BattlePassAutoUpdate.Remove", 3) * MINUTE * IN_MILLISECONDS;
+
+    void reset()
+    {
+        timer = static_cast <uint32>(sWorld.GetModuleIntConfig("BattlePassAutoUpdate", 3)) * MINUTE * IN_MILLISECONDS;
+    }
+
 };
 
 void BattlePassInfo::PlayerAddItem(Player* player, uint32 item, uint32 amount)
@@ -34,7 +42,6 @@ void BattlePassInfo::PlayerAddItem(Player* player, uint32 item, uint32 amount)
 
 void BattlePassInfo::BattlePassLevelUp(Player* player)
 {
-
     BattlePassPlayerInfo* playerBattlePassInfo = player->CustomData.GetDefault<BattlePassPlayerInfo>("BattlePassPlayerInfo");
     playerBattlePassInfo->battlepassLevel++;
 
@@ -74,6 +81,18 @@ void BattlePassInfo::BattlePassLevelUp(Player* player)
         }
 
     }
+
+    // Now We have update, Lets update the player Level in the battle Pass to save progression
+    UpdateBattlePassTable(player);
+}
+
+void BattlePassInfo::UpdateBattlePassTable(Player* player)
+{
+    BattlePassPlayerInfo* playerBattlePassInfo = player->CustomData.GetDefault<BattlePassPlayerInfo>("BattlePassPlayerInfo");
+
+    // update player Details
+    CharacterDatabase.PExecute("UPDATE `battlepass_player` SET `BattlePassLevel` = %u, `CompletedQuest` = %u, `PvPKills` = %u WHERE `playerGUID` = %u;",
+        playerBattlePassInfo->battlepassLevel, playerBattlePassInfo->Quest_Complted, playerBattlePassInfo->pvpKills, player->GetGUID());
 }
 
 bool BattlePassInfo::DoesHaveBattlePass(Player* player)
@@ -101,9 +120,26 @@ class mod_BattlePass_Player : public PlayerScript
 public:
     mod_BattlePass_Player() : PlayerScript("mod_BattlePass_Player") { }
 
+    void OnBeforeUpdate(Player* player, uint32 p_time) override
+    {
+        BattlePassPlayerInfo* playerBattlePassInfo = player->CustomData.GetDefault<BattlePassPlayerInfo>("BattlePassPlayerInfo");
+
+        playerBattlePassInfo->timer-= p_time;
+
+        if (playerBattlePassInfo->timer <= p_time)
+        {
+            sBattlePass->UpdateBattlePassTable(player);
+            if (sWorld.GetModuleBoolConfig("BattlePassAnnounceToPlayer", false))
+                ChatHandler(player).PSendSysMessage("[AUTOSAVE] Battlepass progress has been saved.");
+
+            playerBattlePassInfo->reset();
+        }
+    }
+
     void OnLogin(Player* player, bool firstLogin) override
     {
         QueryResult_AutoPtr result = CharacterDatabase.PQuery("SELECT `playerGUID`, `BattlePassLevel`, `CompletedQuest`, `PvPKills` FROM `battlepass_player` WHERE `playerGUID` = '%u' ", player->GetGUID());
+        BattlePassPlayerInfo* playerBattlePassInfo = player->CustomData.GetDefault<BattlePassPlayerInfo>("BattlePassPlayerInfo");
 
         if (!result)
             return;
@@ -112,13 +148,15 @@ public:
             Field* fields = result->Fetch();
             sBattlePass->pGUID.push_back(fields[0].GetUInt32());
 
-            BattlePassPlayerInfo* playerBattlePassInfo = player->CustomData.GetDefault<BattlePassPlayerInfo>("BattlePassPlayerInfo");
             playerBattlePassInfo->battlepassLevel = fields[1].GetUInt32();
             playerBattlePassInfo->Quest_Complted = fields[2].GetUInt32();
             playerBattlePassInfo->pvpKills = fields[3].GetUInt32();
 
             
         } while (result->NextRow());
+
+        playerBattlePassInfo->timer = sWorld.GetModuleIntConfig("BattlePassAutoUpdate.Remove", 3) * MINUTE * IN_MILLISECONDS;
+
     }
 
     void OnPlayerCompleteQuest(Player* player, Quest const* quest)
@@ -169,11 +207,9 @@ public:
         if (!sBattlePass->DoesHaveBattlePass(player))
             return;
 
-        BattlePassPlayerInfo* playerBattlePassInfo = player->CustomData.GetDefault<BattlePassPlayerInfo>("BattlePassPlayerInfo");
+        // Update the BattlePass Table on Logout
+        sBattlePass->UpdateBattlePassTable(player);
 
-        // Appky new updates to DB on logout
-        CharacterDatabase.PExecute("UPDATE `battlepass_player` SET `BattlePassLevel` = %u, `CompletedQuest` = %u, `PvPKills` = %u WHERE `playerGUID` = %u;",
-            playerBattlePassInfo->battlepassLevel, playerBattlePassInfo->Quest_Complted, playerBattlePassInfo->pvpKills, player->GetGUID());
         sBattlePass->Erase(player);
     }
 };
@@ -249,9 +285,70 @@ public:
     }
 };
 
+class BattlePassCommand : public CommandScript
+{
+public:
+    BattlePassCommand() : CommandScript("BattlePassCommandScript") {}
+
+    std::vector<ChatCommand> GetCommands() const override
+    {
+        static std::vector<ChatCommand> BattlePassCommandTable =
+        {
+            { "Save", SEC_PLAYER, true, &HandlePlayerSaveBattlePassProgress, "Save the Current Progress of the player battle Pass" },
+            { "GrantLevel", SEC_ADMINISTRATOR, false, &HandleGrantBattlePassLevel,    "Grant the Selected Target  a battlepass level"},
+        };
+
+        static std::vector<ChatCommand> commandTable =
+        {
+            { "BattlePass", SEC_PLAYER, false, nullptr, "", BattlePassCommandTable }
+        };
+
+        return commandTable;
+    }
+
+    static bool HandleGrantBattlePassLevel(ChatHandler* handler, char const* args)
+    {
+        if (!handler)
+            return false;
+
+        Player* target = handler->getSelectedPlayer();
+        if (!target)
+            return false;
+        
+        if (!sBattlePass->DoesHaveBattlePass(target))
+            return false;
+
+        BattlePassPlayerInfo* playerBattlePassInfo = target->CustomData.GetDefault<BattlePassPlayerInfo>("BattlePassPlayerInfo");
+        playerBattlePassInfo->pvpKills = 0;
+        playerBattlePassInfo->Quest_Complted = 0;
+        sBattlePass->BattlePassLevelUp(target);
+        return true;
+
+    }
+
+    static bool HandlePlayerSaveBattlePassProgress(ChatHandler* handler, char const* args)
+    {
+        if (!handler)
+            return false;
+
+        Player* player = handler->GetSession()->GetPlayer();
+
+        if (!player)
+            return false;
+
+        if (!sBattlePass->DoesHaveBattlePass(player))
+            return false;
+
+        sBattlePass->UpdateBattlePassTable(player);
+        handler->PSendSysMessage("Your battlepass progress has been saved.");
+        return true;
+    }
+};
+
 void Addmod_battlepassScripts()
 {
     new LoadRewardsTable();
     new mod_BattlePass_Player();
     new BattlePassItem();
+    new BattlePassCommand();
 }

@@ -33,6 +33,7 @@ public:
     bool DoesHaveBattlePass(Player* player);
     void Erase(Player* player);
     void PlayerAddItem(Player* player, uint32 item, uint32 amount);
+    void UpdateBattlePassTable(Player* player);
     std::vector<uint32>pGUID;
     std::unordered_multimap<uint32, mRewardsMap> mRewards;
 
