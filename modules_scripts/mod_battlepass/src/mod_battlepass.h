@@ -34,6 +34,8 @@ public:
     void Erase(Player* player);
     void PlayerAddItem(Player* player, uint32 item, uint32 amount);
     void UpdateBattlePassTable(Player* player);
+    void LoadCustomBattlePassTable();
+    uint32 count;
     std::vector<uint32>pGUID;
     std::unordered_multimap<uint32, mRewardsMap> mRewards;
 

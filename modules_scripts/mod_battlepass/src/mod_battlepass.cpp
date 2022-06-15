@@ -58,6 +58,9 @@ void BattlePassInfo::BattlePassLevelUp(Player* player)
         {
         case 1:
         {
+            if (it->second.reward == 0)
+                return;
+
             ItemTemplate const* itemProto = sItemStorage.LookupEntry<ItemTemplate>(it->second.reward);
             sBattlePass->PlayerAddItem(player, it->second.reward, it->second.amount);
             ChatHandler(player).PSendSysMessage(" %s x %u has been sent to your ingame mailbox", itemProto->Name1, it->second.amount);
@@ -115,6 +118,41 @@ void BattlePassInfo::Erase(Player* player)
         pGUID.erase(it);
 }
 
+void BattlePassInfo::LoadCustomBattlePassTable()
+{
+    // Make sure table is empty due to multimap;
+    mRewards.clear();
+
+    uint32 oldMSTime = getMSTime();
+
+    QueryResult_AutoPtr result = WorldDatabase.PQuery("SELECT `id`, `option`, `reward`, `amount` FROM `battlepass_rewards`");
+
+    if (!result)
+    {
+        sLog.outString("BattlePass_Rewards Table is Empty");
+        sLog.outString("");
+        return;
+    }
+
+    count = 0;
+    do
+    {
+        Field* fields = result->Fetch();
+        mRewardsMap rmap;
+        rmap.id = fields[0].GetUInt32();
+        rmap.option = fields[1].GetUInt32();
+        rmap.reward = fields[2].GetUInt32();
+        rmap.amount = fields[3].GetUInt32();
+
+        sBattlePass->mRewards.insert(std::make_pair(rmap.id, rmap));
+
+        ++count;
+    } while (result->NextRow());
+
+    sLog.outString("server.loading", ">> Loaded %u Battlepass Rewards in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    sLog.outString("server.loading", " ");
+}
+
 class mod_BattlePass_Player : public PlayerScript
 {
 public:
@@ -162,6 +200,10 @@ public:
     void OnPlayerCompleteQuest(Player* player, Quest const* quest)
     {
         if (!player)
+            return;
+
+        // Do not reward for repeatable quests
+        if (quest->IsRepeatable() && !quest->IsDaily())
             return;
 
         if (!sBattlePass->DoesHaveBattlePass(player))
@@ -221,34 +263,7 @@ public:
 
     void OnLoadCustomDatabaseTable()
     {
-        uint32 oldMSTime = getMSTime();
-
-        QueryResult_AutoPtr result = WorldDatabase.PQuery("SELECT `id`, `option`, `reward`, `amount` FROM `battlepass_rewards`");
-
-        if (!result)
-        {
-            sLog.outString("BattlePass_Rewards Table is Empty");
-            sLog.outString("");
-            return;
-        }
-
-        uint32 count = 0;
-        do
-        {
-            Field* fields = result->Fetch();
-            mRewardsMap rmap;
-            rmap.id = fields[0].GetUInt32();
-            rmap.option = fields[1].GetUInt32();
-            rmap.reward = fields[2].GetUInt32();
-            rmap.amount = fields[3].GetUInt32();
-
-            sBattlePass->mRewards.insert(std::make_pair(rmap.id, rmap));
-
-            ++count;
-        } while (result->NextRow());
-
-        sLog.outString("server.loading", ">> Loaded %u Battlepass Rewards in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-        sLog.outString("server.loading", " ");
+        sBattlePass->LoadCustomBattlePassTable();
     }
 };
 
@@ -295,7 +310,8 @@ public:
         static std::vector<ChatCommand> BattlePassCommandTable =
         {
             { "Save", SEC_PLAYER, true, &HandlePlayerSaveBattlePassProgress, "Save the Current Progress of the player battle Pass" },
-            { "GrantLevel", SEC_ADMINISTRATOR, false, &HandleGrantBattlePassLevel,    "Grant the Selected Target  a battlepass level"},
+            { "Level", SEC_ADMINISTRATOR, false, &HandleGrantBattlePassLevel,    "Grant the Selected Target  a battlepass level"},
+            { "Reload", SEC_ADMINISTRATOR, false, &HandleBattlePassReload, "Reaload all items in the DB"}
         };
 
         static std::vector<ChatCommand> commandTable =
@@ -304,6 +320,13 @@ public:
         };
 
         return commandTable;
+    }
+
+    static bool HandleBattlePassReload(ChatHandler* handler, char const* args)
+    {
+        sBattlePass->LoadCustomBattlePassTable();
+        handler->PSendSysMessage("BattlePass_Rewards table relaoded with %u entry", sBattlePass->count);
+        return true;
     }
 
     static bool HandleGrantBattlePassLevel(ChatHandler* handler, char const* args)
